@@ -8,11 +8,11 @@
 
 本章沿着"动手 → 机制 → 前沿 → 展望"的路径展开。先在 GSM8K 数学题上跑一个 GRPO 实验，再深入理解组内归一化的原理，然后追踪 DeepSeek-R1-Zero 和 DAPO 的最新进展，最后展望 RL Scaling 和 Test-time Scaling 的未来方向。
 
-| 小节 | 你会回答的问题 |
-| ---- | -------------- |
-| [动手：GRPO 训练数学推理](./grpo-hands-on) | GRPO 训练过程是什么样的？省掉了 Critic 后显存能省多少？ |
-| [GRPO 核心机制](./grpo-mechanism) | 组内归一化为什么能替代 Critic？k 值怎么选？ |
-| [DeepSeek-R1-Zero、DAPO 与 RLVR](./deepseek-dapo-rlvr) | 纯 RL 训练不用 SFT 行不行？可验证奖励能取代 RM 吗？ |
-| [RL Scaling 与未来展望](./rl-scaling-outlook) | Online vs Offline 怎么选？RL Scaling 的天花板在哪？PRM 和 ORM 有什么区别？ |
+| 小节                                                   | 你会回答的问题                                                             |
+| ------------------------------------------------------ | -------------------------------------------------------------------------- |
+| [动手：GRPO 训练数学推理](./grpo-hands-on)             | GRPO 训练过程是什么样的？省掉了 Critic 后显存能省多少？                    |
+| [GRPO 核心机制](./grpo-mechanism)                      | 组内归一化为什么能替代 Critic？k 值怎么选？                                |
+| [DeepSeek-R1-Zero、DAPO 与 RLVR](./deepseek-dapo-rlvr) | 纯 RL 训练不用 SFT 行不行？可验证奖励能取代 RM 吗？                        |
+| [RL Scaling 与未来展望](./rl-scaling-outlook)          | Online vs Offline 怎么选？RL Scaling 的天花板在哪？PRM 和 ORM 有什么区别？ |
 
 准备好了吗？让我们从 GRPO 的动手实验开始——[动手：GRPO 训练数学推理](./grpo-hands-on)。

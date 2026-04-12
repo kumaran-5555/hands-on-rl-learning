@@ -12,13 +12,13 @@
 - [PPO 算法与裁剪机制](../chapter06_ppo/intro)——RLHF 第三阶段的核心优化器
 - [DPO 与偏好数据](../chapter07_alignment/intro)——偏好对 (chosen, rejected) 的另一种用法
 - [GRPO 与组内相对优势](../chapter08_grpo_rlvr/intro)——不用 Critic 的策略优化
-:::
+  :::
 
-| 小节 | 你会回答的问题 |
-| ---- | -------------- |
-| [模仿学习与数据工程](./imitation-learning-pipeline) | SFT 和 RM 的理论基础是什么？数据怎么构造和清洗？ |
-| [奖励函数设计](./reward-function-design) | 规则奖励和模型奖励怎么选？Bradley-Terry 模型怎么工作？ |
-| [训练稳定性与奖励黑客](./training-stability-hacking) | 怎么让 RLHF 训练不崩溃？怎么发现和防范奖励黑客？ |
-| [RLAIF 与自我博弈](./rlaif-self-play) | 能不能用 AI 替代人类标注？自我博弈怎么实现？ |
+| 小节                                                 | 你会回答的问题                                         |
+| ---------------------------------------------------- | ------------------------------------------------------ |
+| [模仿学习与数据工程](./imitation-learning-pipeline)  | SFT 和 RM 的理论基础是什么？数据怎么构造和清洗？       |
+| [奖励函数设计](./reward-function-design)             | 规则奖励和模型奖励怎么选？Bradley-Terry 模型怎么工作？ |
+| [训练稳定性与奖励黑客](./training-stability-hacking) | 怎么让 RLHF 训练不崩溃？怎么发现和防范奖励黑客？       |
+| [RLAIF 与自我博弈](./rlaif-self-play)                | 能不能用 AI 替代人类标注？自我博弈怎么实现？           |
 
 准备好了吗？让我们从模仿学习的理论基础开始——[模仿学习与数据工程](./imitation-learning-pipeline)。

@@ -216,18 +216,18 @@ TD3 用两个 Q 网络取最小值计算目标，防止 Q 值过估计。这是 
 
 ## F.10 公式速查索引
 
-| 公式 | 符号 | 出处 |
-|------|------|------|
-| 状态价值 | $V^\pi(s)$ | Ch3 |
-| 动作价值 | $Q^\pi(s,a)$ | Ch3 |
-| 贝尔曼方程 | $V = R + \gamma PV$ | Ch3 |
-| 策略梯度 | $\nabla J = \mathbb{E}[\nabla\log\pi \cdot G]$ | Ch5 |
-| PPO 裁剪 | $L = \min(rA, \text{clip}(r)A)$ | Ch6 |
-| GAE | $\hat{A} = \sum(\gamma\lambda)^k \delta_k$ | Ch6 |
-| DPO | $-\log\sigma(\beta\Delta\log\pi)$ | Ch7 |
-| Bradley-Terry | $P(y_w \succ y_l) = \sigma(r_w - r_l)$ | Ch7 |
-| KL 散度 | $D_{KL} = \sum P\log(P/Q)$ | Ch7 |
-| GRPO | $\hat{A}_i = (r_i - \mu)/\sigma$ | Ch8 |
+| 公式          | 符号                                           | 出处 |
+| ------------- | ---------------------------------------------- | ---- |
+| 状态价值      | $V^\pi(s)$                                     | Ch3  |
+| 动作价值      | $Q^\pi(s,a)$                                   | Ch3  |
+| 贝尔曼方程    | $V = R + \gamma PV$                            | Ch3  |
+| 策略梯度      | $\nabla J = \mathbb{E}[\nabla\log\pi \cdot G]$ | Ch5  |
+| PPO 裁剪      | $L = \min(rA, \text{clip}(r)A)$                | Ch6  |
+| GAE           | $\hat{A} = \sum(\gamma\lambda)^k \delta_k$     | Ch6  |
+| DPO           | $-\log\sigma(\beta\Delta\log\pi)$              | Ch7  |
+| Bradley-Terry | $P(y_w \succ y_l) = \sigma(r_w - r_l)$         | Ch7  |
+| KL 散度       | $D_{KL} = \sum P\log(P/Q)$                     | Ch7  |
+| GRPO          | $\hat{A}_i = (r_i - \mu)/\sigma$               | Ch8  |
 
 ::: tip 使用建议
 这个附录是查阅工具，不需要从头背到尾。遇到不熟悉的公式时，回来翻对应的章节链接，看完整的推导过程。

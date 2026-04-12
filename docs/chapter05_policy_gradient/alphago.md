@@ -12,11 +12,11 @@
 
 AlphaGo 由三个核心组件构成：
 
-| 组件          | 作用                           | 对应本章概念            |
-| ------------- | ------------------------------ | ----------------------- |
-| 策略网络      | 给出每个合法落子位置的概率     | 第 5.1-5.2 节的策略梯度 |
-| 价值网络      | 评估当前局面的胜率             | 第 5.3 节的 Critic      |
-| 蒙特卡洛树搜索 | 向前看若干步，找到最佳落子     | 这一节新引入            |
+| 组件           | 作用                       | 对应本章概念            |
+| -------------- | -------------------------- | ----------------------- |
+| 策略网络       | 给出每个合法落子位置的概率 | 第 5.1-5.2 节的策略梯度 |
+| 价值网络       | 评估当前局面的胜率         | 第 5.3 节的 Critic      |
+| 蒙特卡洛树搜索 | 向前看若干步，找到最佳落子 | 这一节新引入            |
 
 它们的关系是：MCTS 是"大脑"，策略网络提供"直觉"（优先搜索哪些分支），价值网络提供"判断"（不用搜到底就能评估局面）。
 
@@ -578,13 +578,13 @@ def env_to_string(board):
 
 把 AlphaGo 的每个组件对应回本章学过的知识：
 
-| AlphaGo 组件    | 对应概念                     | 本章出处                 |
-| --------------- | ---------------------------- | ------------------------ |
-| 策略网络        | Actor，输出动作概率          | 5.1-5.2 策略梯度        |
-| 价值网络        | Critic，评估局面价值         | 5.3 Actor-Critic         |
-| MCTS 策略监督   | 降低方差的"可靠策略信号"     | 5.4 基线实验             |
-| 自我对弈        | 在线采样 + 策略改进          | 5.2 REINFORCE 的采样思想 |
-| $-v$ 回传       | 零和博弈的对称性             | 5.3 优势函数的符号翻转   |
+| AlphaGo 组件  | 对应概念                 | 本章出处                 |
+| ------------- | ------------------------ | ------------------------ |
+| 策略网络      | Actor，输出动作概率      | 5.1-5.2 策略梯度         |
+| 价值网络      | Critic，评估局面价值     | 5.3 Actor-Critic         |
+| MCTS 策略监督 | 降低方差的"可靠策略信号" | 5.4 基线实验             |
+| 自我对弈      | 在线采样 + 策略改进      | 5.2 REINFORCE 的采样思想 |
+| $-v$ 回传     | 零和博弈的对称性         | 5.3 优势函数的符号翻转   |
 
 你会发现：AlphaGo 的核心就是 Actor-Critic + MCTS 搜索。策略网络（Actor）提供搜索方向，价值网络（Critic）提供叶子节点评估，MCTS 把两者组合成比任何单一组件都强的决策。这个"Actor 提供先验 + Critic 提供评估 + 搜索做整合"的模式，后来被 AlphaZero 推广到国际象棋和将棋，也影响了后续许多 RL 算法的设计。
 
@@ -594,24 +594,24 @@ def env_to_string(board):
 
 ### 推荐开源项目
 
-| 项目 | 说明 | 适合场景 |
-| --- | --- | --- |
+| 项目                                                                  | 说明                                                 | 适合场景                             |
+| --------------------------------------------------------------------- | ---------------------------------------------------- | ------------------------------------ |
 | [alpha-zero-general](https://github.com/suragnair/alpha-zero-general) | PyTorch，游戏无关架构，自带 Othello/Gomoku/TicTacToe | **入门首选**，代码最简洁，笔记本可跑 |
-| [michaelnny/alpha_zero](https://github.com/michaelnny/alpha_zero) | PyTorch，9×9 围棋 + 15×15 五子棋 | 想在 9×9 棋盘上跑真正的围棋 |
-| [KataGo](https://github.com/lightvector/KataGo) | C++/Python，支持 7×7 到 19×19，有预训练模型 | 需要**预训练权重**做实验或对战 |
-| [Leela Zero](https://github.com/leela-zero/leela-zero) | C++，AlphaGo Zero 的忠实复现 | 研究 AlphaGo Zero 的原始算法 |
-| [MiniZero](https://github.com/rlglab/minizero) | C++/Python，支持 AlphaZero/MuZero/Gumbel 变体 | 对比不同 MCTS 算法变体 |
+| [michaelnny/alpha_zero](https://github.com/michaelnny/alpha_zero)     | PyTorch，9×9 围棋 + 15×15 五子棋                     | 想在 9×9 棋盘上跑真正的围棋          |
+| [KataGo](https://github.com/lightvector/KataGo)                       | C++/Python，支持 7×7 到 19×19，有预训练模型          | 需要**预训练权重**做实验或对战       |
+| [Leela Zero](https://github.com/leela-zero/leela-zero)                | C++，AlphaGo Zero 的忠实复现                         | 研究 AlphaGo Zero 的原始算法         |
+| [MiniZero](https://github.com/rlglab/minizero)                        | C++/Python，支持 AlphaZero/MuZero/Gumbel 变体        | 对比不同 MCTS 算法变体               |
 
 **最推荐的路径**：先跑 [alpha-zero-general](https://github.com/suragnair/alpha-zero-general) 的 Othello（自带环境，零配置），理解整个 pipeline 后，再切到围棋场景。
 
 ### 可用数据集
 
-| 数据集 | 规模 | 说明 |
-| --- | --- | --- |
-| [JGDB](https://pjreddie.com/projects/jgdb/) | 53.5 万局，194 MB | **最佳选择**，已预分 train/val/test，公共领域，由 YOLO 作者制作 |
-| [featurecat/go-dataset](https://github.com/featurecat/go-dataset) | 2110 万局 | 最大规模，来自 Fox 弈城，涵盖 18k 到 9p |
-| [CWI 日本职业棋谱](https://homepages.cwi.nl/~aeb/go/games/games/) | 8.8 万局，45 MB | 职业棋手对局，精校数据 |
-| [KGS 棋谱档案](https://www.gokgs.com/) | 百万局以上 | KGS 围棋服务器存档，各段位混合 |
+| 数据集                                                            | 规模              | 说明                                                            |
+| ----------------------------------------------------------------- | ----------------- | --------------------------------------------------------------- |
+| [JGDB](https://pjreddie.com/projects/jgdb/)                       | 53.5 万局，194 MB | **最佳选择**，已预分 train/val/test，公共领域，由 YOLO 作者制作 |
+| [featurecat/go-dataset](https://github.com/featurecat/go-dataset) | 2110 万局         | 最大规模，来自 Fox 弈城，涵盖 18k 到 9p                         |
+| [CWI 日本职业棋谱](https://homepages.cwi.nl/~aeb/go/games/games/) | 8.8 万局，45 MB   | 职业棋手对局，精校数据                                          |
+| [KGS 棋谱档案](https://www.gokgs.com/)                            | 百万局以上        | KGS 围棋服务器存档，各段位混合                                  |
 
 用 JGDB 做监督预训练的流程：下载 SGF → 解析为 (棋盘, 落子) 对 → 训练策略网络模仿人类走法 → 再用自我对弈强化。这正是 AlphaGo 论文中第一阶段的做法。
 

@@ -173,21 +173,23 @@ pip install lm-eval
 
 ::: tip 版本兼容性
 如果遇到版本冲突，可以用以下命令安装经过测试的版本组合：
+
 ```bash
 pip install "transformers>=4.45.0" "trl>=0.12.0" "peft>=0.13.0" "accelerate>=1.0.0"
 ```
+
 :::
 
 ## D.6 GPU 驱动检查清单
 
 在开始训练之前，确认以下几项都正常。
 
-| 检查项 | 命令 | 期望结果 |
-|--------|------|----------|
-| NVIDIA 驱动 | `nvidia-smi` | 显示驱动版本和 GPU 信息 |
-| CUDA 版本 | `nvcc --version` | 与 PyTorch 编译版本匹配 |
-| cuDNN | `torch.backends.cudnn.version()` | 返回版本号 |
-| PyTorch GPU | `torch.cuda.is_available()` | `True` |
+| 检查项      | 命令                             | 期望结果                |
+| ----------- | -------------------------------- | ----------------------- |
+| NVIDIA 驱动 | `nvidia-smi`                     | 显示驱动版本和 GPU 信息 |
+| CUDA 版本   | `nvcc --version`                 | 与 PyTorch 编译版本匹配 |
+| cuDNN       | `torch.backends.cudnn.version()` | 返回版本号              |
+| PyTorch GPU | `torch.cuda.is_available()`      | `True`                  |
 
 ```python
 # 一键检查脚本
@@ -321,26 +323,26 @@ print("=" * 45 + "\n")
 
 ## D.9 环境包总览
 
-| 包名 | 推荐版本 | 用途 | 相关章节 |
-|------|---------|------|---------|
-| Python | 3.10+ | 运行时 | 全书 |
-| PyTorch | 2.1+ | 深度学习框架 | 全书 |
-| gymnasium | 0.29+ | RL 环境接口 | Ch1, Ch3-Ch6 |
-| stable-baselines3 | 2.2+ | 封装好的 RL 算法 | Ch1, Ch4-Ch6 |
-| numpy | 1.24+ | 数值计算 | 全书 |
-| matplotlib | 3.7+ | 可视化绘图 | 全书 |
-| pybullet | 3.2+ | 机器人仿真 | Ch9 |
-| mujoco | 3.0+ | 高精度物理仿真 | Ch9 |
-| isaacsim | 4.0+ | GPU 并行机器人仿真（Isaac Lab） | Ch9, Ch13 |
-| mlagents | 1.0+ | Unity 3D 游戏 RL 环境 | 附录 |
-| ale-py | 0.8+ | Atari 模拟器 | Ch4 |
-| transformers | 4.45+ | LLM 模型加载 | Ch7-Ch12 |
-| trl | 0.12+ | LLM 强化学习训练 | Ch7-Ch8 |
-| peft | 0.13+ | 参数高效微调 (LoRA) | Ch7-Ch12 |
-| accelerate | 1.0+ | 分布式训练 | Ch7-Ch12 |
-| datasets | 3.0+ | 数据集加载 | Ch7-Ch12 |
-| wandb | 0.16+ | 实验追踪 | 全书 |
-| tensorboard | 2.15+ | 训练可视化 | 全书 |
+| 包名              | 推荐版本 | 用途                            | 相关章节     |
+| ----------------- | -------- | ------------------------------- | ------------ |
+| Python            | 3.10+    | 运行时                          | 全书         |
+| PyTorch           | 2.1+     | 深度学习框架                    | 全书         |
+| gymnasium         | 0.29+    | RL 环境接口                     | Ch1, Ch3-Ch6 |
+| stable-baselines3 | 2.2+     | 封装好的 RL 算法                | Ch1, Ch4-Ch6 |
+| numpy             | 1.24+    | 数值计算                        | 全书         |
+| matplotlib        | 3.7+     | 可视化绘图                      | 全书         |
+| pybullet          | 3.2+     | 机器人仿真                      | Ch9          |
+| mujoco            | 3.0+     | 高精度物理仿真                  | Ch9          |
+| isaacsim          | 4.0+     | GPU 并行机器人仿真（Isaac Lab） | Ch9, Ch13    |
+| mlagents          | 1.0+     | Unity 3D 游戏 RL 环境           | 附录         |
+| ale-py            | 0.8+     | Atari 模拟器                    | Ch4          |
+| transformers      | 4.45+    | LLM 模型加载                    | Ch7-Ch12     |
+| trl               | 0.12+    | LLM 强化学习训练                | Ch7-Ch8      |
+| peft              | 0.13+    | 参数高效微调 (LoRA)             | Ch7-Ch12     |
+| accelerate        | 1.0+     | 分布式训练                      | Ch7-Ch12     |
+| datasets          | 3.0+     | 数据集加载                      | Ch7-Ch12     |
+| wandb             | 0.16+    | 实验追踪                        | 全书         |
+| tensorboard       | 2.15+    | 训练可视化                      | 全书         |
 
 ::: tip 不用一次装完
 建议按课程进度安装：先装 D.1-D.3 的基础包，等学到对应章节再装仿真环境和 LLM 框架，避免一次性解决太多依赖冲突。

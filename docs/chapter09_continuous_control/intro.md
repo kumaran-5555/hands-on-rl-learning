@@ -12,14 +12,14 @@
 - [DQN 的 Q-Network 与经验回放](../chapter04_dqn/dqn-components)——"用神经网络近似 Q 值"和"打破样本相关性"
 - [Actor-Critic 架构](../chapter05_policy_gradient/actor-critic)——"双网络：策略 + 价值函数"
 - [策略梯度定理](../chapter05_policy_gradient/policy-gradient)——"直接优化策略参数的数学基础"
-:::
+  :::
 
-| 小节 | 你会回答的问题 |
-| ---- | -------------- |
-| [动手：PyBullet 机器人仿真](./pybullet-hands-on) | 连续动作空间长什么样？如何在仿真中操控机器人？ |
+| 小节                                                | 你会回答的问题                                                   |
+| --------------------------------------------------- | ---------------------------------------------------------------- |
+| [动手：PyBullet 机器人仿真](./pybullet-hands-on)    | 连续动作空间长什么样？如何在仿真中操控机器人？                   |
 | [连续策略与 DDPG/TD3](./continuous-policy-ddpg-td3) | 离散和连续动作空间有什么本质区别？DDPG 和 TD3 如何解决连续控制？ |
-| [SAC、算法对比与并行采样](./sac-comparison) | 为什么 SAC 是连续控制的首选？PPO/TD3/SAC 各适合什么场景？ |
-| [HER：把失败变成成功](./her-sparse-reward) | 稀疏奖励下智能体学不动怎么办？如何用"换个目标"变废为宝？ |
-| [扩散策略：生成式连续控制](./diffusion-policy) | 动作生成能否借鉴图像扩散模型？多模态策略如何表达？ |
+| [SAC、算法对比与并行采样](./sac-comparison)         | 为什么 SAC 是连续控制的首选？PPO/TD3/SAC 各适合什么场景？        |
+| [HER：把失败变成成功](./her-sparse-reward)          | 稀疏奖励下智能体学不动怎么办？如何用"换个目标"变废为宝？         |
+| [扩散策略：生成式连续控制](./diffusion-policy)      | 动作生成能否借鉴图像扩散模型？多模态策略如何表达？               |
 
 准备好了吗？让我们从 PyBullet 机器人仿真开始——[动手：PyBullet 机器人仿真](./pybullet-hands-on)。

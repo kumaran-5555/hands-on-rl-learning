@@ -12,12 +12,12 @@
 - [GRPO 算法](../chapter08_grpo_rlvr/intro)——不用 Critic 的组内相对优化
 - [奖励函数设计](../chapter10_rlhf/reward-function-design)——规则奖励与模型奖励的选择
 - [训练稳定性控制](../chapter10_rlhf/training-stability-hacking)——KL 惩罚与梯度裁剪
-:::
+  :::
 
-| 小节 | 你会回答的问题 |
-| ---- | -------------- |
+| 小节                                       | 你会回答的问题                                        |
+| ------------------------------------------ | ----------------------------------------------------- |
 | [动手：GRPO 训练 VLM](./vlm-grpo-hands-on) | 怎么用 GRPO 让 VLM 学会"看图再推理"？训练指标怎么看？ |
-| [VLM RL 的特殊挑战](./vlm-challenges) | 视觉 token 的奖励怎么分配？视觉幻觉怎么应对？ |
-| [VLM RL 框架与前沿](./vlm-frameworks) | VisPlay、VISTA-Gym 等框架怎么工作？未来有哪些方向？ |
+| [VLM RL 的特殊挑战](./vlm-challenges)      | 视觉 token 的奖励怎么分配？视觉幻觉怎么应对？         |
+| [VLM RL 框架与前沿](./vlm-frameworks)      | VisPlay、VISTA-Gym 等框架怎么工作？未来有哪些方向？   |
 
 准备好了吗？让我们先动手跑一个 VLM 的 GRPO 实验——[动手：GRPO 训练 VLM](./vlm-grpo-hands-on)。
