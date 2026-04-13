@@ -12,6 +12,7 @@ const FONT_SIZE_STORAGE_KEY = 'ct-doc-font-size'
 const LINE_HEIGHT_STORAGE_KEY = 'ct-doc-line-height'
 const SIDEBAR_COLLAPSED_KEY = 'ct-sidebar-collapsed'
 const SIDEBAR_WIDTH_KEY = 'ct-sidebar-width'
+const THEME_STYLE_KEY = 'ct-doc-theme'
 
 const MIN_FONT_SIZE = 15
 const MAX_FONT_SIZE = 20
@@ -19,6 +20,7 @@ const DEFAULT_FONT_SIZE = 16
 const MIN_LINE_HEIGHT = 1.55
 const MAX_LINE_HEIGHT = 2
 const DEFAULT_LINE_HEIGHT = 1.75
+const DEFAULT_THEME_STYLE = 'claude'
 
 const DEFAULT_SIDEBAR_WIDTH = 272
 const MIN_SIDEBAR_WIDTH = 190
@@ -26,6 +28,7 @@ const MAX_SIDEBAR_WIDTH = 520
 
 const fontSize = ref(DEFAULT_FONT_SIZE)
 const lineHeight = ref(DEFAULT_LINE_HEIGHT)
+const themeStyle = ref(DEFAULT_THEME_STYLE)
 const readingToolsOpen = ref(false)
 const sidebarCollapsed = ref(false)
 const sidebarWidth = ref(DEFAULT_SIDEBAR_WIDTH)
@@ -99,6 +102,11 @@ function applyLineHeight(value) {
     '--ct-doc-line-height',
     String(value)
   )
+}
+
+function applyThemeStyle(value) {
+  if (typeof document === 'undefined') return
+  document.documentElement.setAttribute('data-ct-theme', value)
 }
 
 function applySidebarWidth(width) {
@@ -340,13 +348,17 @@ onMounted(() => {
   const savedLineHeight = clampLineHeight(
     localStorage.getItem(LINE_HEIGHT_STORAGE_KEY)
   )
+  const savedThemeStyle =
+    localStorage.getItem(THEME_STYLE_KEY) || DEFAULT_THEME_STYLE
   const savedSidebarWidth = localStorage.getItem(SIDEBAR_WIDTH_KEY)
   const savedCollapsed = localStorage.getItem(SIDEBAR_COLLAPSED_KEY)
 
   fontSize.value = savedFontSize
   lineHeight.value = savedLineHeight
+  themeStyle.value = savedThemeStyle
   applyFontSize(savedFontSize)
   applyLineHeight(savedLineHeight)
+  applyThemeStyle(savedThemeStyle)
 
   if (savedSidebarWidth) {
     setSidebarWidth(savedSidebarWidth, false)
@@ -385,6 +397,13 @@ watch(lineHeight, (next) => {
   applyLineHeight(normalized)
   if (typeof localStorage !== 'undefined') {
     localStorage.setItem(LINE_HEIGHT_STORAGE_KEY, String(normalized))
+  }
+})
+
+watch(themeStyle, (next) => {
+  applyThemeStyle(next)
+  if (typeof localStorage !== 'undefined') {
+    localStorage.setItem(THEME_STYLE_KEY, next)
   }
 })
 
@@ -502,6 +521,50 @@ watch(
                 :max="MAX_LINE_HEIGHT"
                 step="0.05"
               />
+            </div>
+
+            <div class="ct-reading-tools-group">
+              <div class="ct-reading-tools-header">
+                <div class="ct-reading-tools-title">主题</div>
+              </div>
+              <div class="ct-reading-tools-actions ct-theme-actions">
+                <button
+                  class="ct-reading-tools-action ct-theme-btn"
+                  :class="{ active: themeStyle === 'claude' }"
+                  type="button"
+                  @click="themeStyle = 'claude'"
+                >
+                  <span class="ct-theme-color ct-theme-color-claude"></span>
+                  默认
+                </button>
+                <button
+                  class="ct-reading-tools-action ct-theme-btn"
+                  :class="{ active: themeStyle === 'pure' }"
+                  type="button"
+                  @click="themeStyle = 'pure'"
+                >
+                  <span class="ct-theme-color ct-theme-color-pure"></span>
+                  纯白
+                </button>
+                <button
+                  class="ct-reading-tools-action ct-theme-btn"
+                  :class="{ active: themeStyle === 'sepia' }"
+                  type="button"
+                  @click="themeStyle = 'sepia'"
+                >
+                  <span class="ct-theme-color ct-theme-color-sepia"></span>
+                  护眼
+                </button>
+                <button
+                  class="ct-reading-tools-action ct-theme-btn"
+                  :class="{ active: themeStyle === 'gray' }"
+                  type="button"
+                  @click="themeStyle = 'gray'"
+                >
+                  <span class="ct-theme-color ct-theme-color-gray"></span>
+                  柔灰
+                </button>
+              </div>
             </div>
           </div>
         </Transition>
@@ -658,6 +721,47 @@ watch(
 .ct-reading-tools-action:hover {
   border-color: rgba(15, 118, 110, 0.32);
   color: var(--vp-c-brand-1);
+}
+
+.ct-theme-actions {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.ct-theme-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 500;
+}
+
+.ct-theme-btn.active {
+  border-color: var(--vp-c-brand-1);
+  background: var(--vp-c-brand-soft);
+  color: var(--vp-c-brand-1);
+}
+
+.ct-theme-color {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.ct-theme-color-claude {
+  background: #fcfbf9;
+}
+
+.ct-theme-color-pure {
+  background: #ffffff;
+}
+
+.ct-theme-color-sepia {
+  background: #f4ecd8;
+}
+
+.ct-theme-color-gray {
+  background: #f3f4f6;
 }
 
 .ct-reading-tools-range {
