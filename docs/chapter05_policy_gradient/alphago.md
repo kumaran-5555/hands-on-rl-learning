@@ -622,8 +622,6 @@ def env_to_string(board):
 3. **MCTS 模拟次数**：对比 10 次、50 次、200 次模拟对棋力的影响。更多模拟一定更好吗？
 4. **用 JGDB 做监督预训练**：下载 [JGDB 数据集](https://pjreddie.com/projects/jgdb/)，解析 SGF 格式棋谱，先让策略网络学会"模仿人类走法"，再用自我对弈强化——这就是完整的 AlphaGo pipeline。
 
----
-
 ## 参考文献
 
 [^1]: Silver, D., et al. (2016). Mastering the game of Go with deep neural networks and tree search. _Nature_, 529(7587), 484-489. [DOI](https://doi.org/10.1038/nature16961)

@@ -277,3 +277,11 @@ for iteration in range(100):        # 外层循环：重复训练 100 轮
 这就是强化学习的全部秘密。不是魔法，只是一个足够聪明的试错循环。
 
 > **关键认知**：从现在起，当你看到任何 RL 库的 `model.learn()` 或 `trainer.train()` 时，不必再感到神秘。它们的核心骨架都和上面这个三步循环一样——区别只在于"怎么算损失"和"怎么采样数据"这两个细节上。后续章节的所有内容，本质上都是在回答这两个问题。
+
+## 参考文献
+
+[^1]: Mnih, V., et al. (2013). Playing Atari with Deep Reinforcement Learning. _arXiv preprint_. [arXiv:1312.5602](https://arxiv.org/abs/1312.5602)
+
+[^2]: Raffin, A., et al. (2021). Stable-Baselines3: Reliable Reinforcement Learning Implementations. _Journal of Machine Learning Research_, 22(268), 1-8.
+
+[^3]: Williams, R. J. (1992). Simple statistical gradient-following algorithms for connectionist reinforcement learning. _Machine Learning_, 8(3-4), 229-256. [DOI](https://doi.org/10.1007/BF00992696)

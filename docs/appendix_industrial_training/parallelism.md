@@ -85,11 +85,19 @@ RL 训练（PPO/GRPO）比普通微调复杂，因为要同时管理多个模型
 
 **PRM 的额外计算**：Process Reward Model 对推理链的每一步打分，计算量可能接近生成本身。这意味着在推理集群和训练集群之间可能要再加一组 GPU 跑 PRM scoring。目前只有少数框架（如 PRIME-RL）实现了这种流水线。
 
----
-
 ## 参考文献
 
 - [^1] HuggingFace Blog, [Async RL Training Landscape — 16 Open-Source Libraries Compared](https://huggingface.co/blog/async-rl-training-landscape), 2026.
 - [^2] PyTorch Blog, [A Primer on LLM Post-Training](https://pytorch.org/blog/a-primer-on-llm-post-training/), 2025.
 - [^3] OpenRLHF, [OpenRLHF: A High-Performance RLHF Framework](https://arxiv.org/html/2501.03262v4), EMNLP 2025 Demo.
 - [^4] DeepSeek-AI, [DeepSeek-V3 Technical Report](https://arxiv.org/abs/2412.19437), 2024.
+
+## 参考文献
+
+[^1]: HuggingFace Blog, [Async RL Training Landscape — 16 Open-Source Libraries Compared](https://huggingface.co/blog/async-rl-training-landscape), 2026.
+
+[^2]: PyTorch Blog, [A Primer on LLM Post-Training](https://pytorch.org/blog/a-primer-on-llm-post-training/), 2025.
+
+[^3]: OpenRLHF, [OpenRLHF: A High-Performance RLHF Framework](https://arxiv.org/html/2501.03262v4), EMNLP 2025 Demo.
+
+[^4]: DeepSeek-AI, [DeepSeek-V3 Technical Report](https://arxiv.org/abs/2412.19437), 2024.

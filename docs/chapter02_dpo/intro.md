@@ -186,3 +186,11 @@ print("=" * 40)
 2. **什么是 Post-Training？** DPO 在大模型的生命周期中到底处于什么位置？
 
 在下一节中，我们将打开 DPO 的黑盒，看看这些训练指标背后代表着什么，并深入理解 Post-Training 的理论框架。
+
+## 参考文献
+
+[^1]: Schulman, J., et al. (2017). Proximal Policy Optimization Algorithms. _arXiv preprint_. [arXiv:1707.06347](https://arxiv.org/abs/1707.06347)
+
+[^2]: Ouyang, L., et al. (2022). Training language models to follow instructions with human feedback. _arXiv preprint_. [arXiv:2203.02155](https://arxiv.org/abs/2203.02155)
+
+[^3]: Rafailov, R., et al. (2023). Direct Preference Optimization: Your Language Model is Secretly a Reward Model. _arXiv preprint_. [arXiv:2305.18290](https://arxiv.org/abs/2305.18290)

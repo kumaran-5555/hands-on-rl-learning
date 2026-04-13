@@ -57,8 +57,6 @@ Loss 依然会正常下降！因为模型只是在无脑地拟合数据中给定
 
 无论是第一章的 CartPole，还是本章的大模型微调，我们都在试图让机器学会做出“更好的决策”。接下来，我们将正式进入理论篇，系统地拆解强化学习底层的数学逻辑。
 
----
-
 ## 参考文献
 
 [^1]: Schulman, J., et al. (2017). Proximal Policy Optimization Algorithms. _arXiv preprint_. [arXiv:1707.06347](https://arxiv.org/abs/1707.06347)

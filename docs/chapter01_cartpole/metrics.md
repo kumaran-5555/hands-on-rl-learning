@@ -161,8 +161,6 @@ graph TD
 
 在下一章中，我们将打开另一扇门：看看 RL 不只是让小车平衡杆子——它还能让大语言模型学会"说好话"。那将是完全不同的应用场景，但核心循环仍然是这四个要素。
 
----
-
 ## 参考文献
 
 [^1]: Mnih, V., et al. (2013). Playing Atari with Deep Reinforcement Learning. _arXiv preprint_. [arXiv:1312.5602](https://arxiv.org/abs/1312.5602)

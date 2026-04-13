@@ -117,9 +117,13 @@ Agentic 任务的评测本身就是多轮交互，成本比文本评测高得多
 
 编排器（Orchestrator）是 Agentic RL 的核心组件，负责协调策略模型、沙箱、工具执行和轨迹存储之间的多轮交互。Ray 是目前最常用的编排工具，因为它原生支持异构资源调度和容错。
 
----
-
 ## 参考文献
 
 - [^1] HuggingFace Blog, [Async RL Training Landscape — 16 Open-Source Libraries Compared](https://huggingface.co/blog/async-rl-training-landscape), 2026.
 - [^2] PyTorch Blog, [A Primer on LLM Post-Training](https://pytorch.org/blog/a-primer-on-llm-post-training/), 2025.
+
+## 参考文献
+
+[^1]: HuggingFace Blog, [Async RL Training Landscape — 16 Open-Source Libraries Compared](https://huggingface.co/blog/async-rl-training-landscape), 2026.
+
+[^2]: PyTorch Blog, [A Primer on LLM Post-Training](https://pytorch.org/blog/a-primer-on-llm-post-training/), 2025.

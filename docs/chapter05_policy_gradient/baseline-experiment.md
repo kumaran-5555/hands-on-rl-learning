@@ -199,8 +199,6 @@ plt.show()
 
 4. **连续动作空间**：假设你要训练一个机器人走路，状态是关节角度和速度，动作是每个关节的力矩（连续值）。策略网络应该输出什么？怎么从输出中采样动作？
 
----
-
 ## 参考文献
 
 [^1]: Williams, R. J. (1992). Simple statistical gradient-following algorithms for connectionist reinforcement learning. _Machine Learning_, 8(3-4), 229-256. [DOI](https://doi.org/10.1007/BF00992696)

@@ -132,8 +132,6 @@
 
 工业界趋势：**队列深度兜底 + 可选的数学修正**，兼顾效率和稳定性。
 
----
-
 ## 参考文献
 
 [^1]: HuggingFace Blog, [Async RL Training Landscape — 16 Open-Source Libraries Compared](https://huggingface.co/blog/async-rl-training-landscape), 2026. 本页核心数据来源。

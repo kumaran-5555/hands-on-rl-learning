@@ -126,8 +126,6 @@ CPU 采样 + GPU 训练      Sample Factory           Ray 分布式编排
 - 环境重 + 需要高吞吐采样 → 阶段二（Sample Factory / Isaac Gym）
 - LLM + 需要大规模 PPO/GRPO → 阶段三（OpenRLHF / veRL）
 
----
-
 ## 参考文献
 
 [^1]: HuggingFace Blog, [Async RL Training Landscape — 16 Open-Source Libraries Compared](https://huggingface.co/blog/async-rl-training-landscape), 2026.
