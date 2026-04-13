@@ -4,34 +4,25 @@
 
 教一个小孩骑自行车，你会怎么做？
 
+![Learning to ride a bike](/images/learning_bike.jpg)
+
+<div style="text-align: center; font-size: 0.9em; color: var(--vp-c-text-2); margin-top: -10px; margin-bottom: 20px;">
+  <em>图 1：教小孩骑自行车的过程，正是一个典型的试错（Trial-and-Error）学习过程。来源：<a href="https://commons.wikimedia.org/wiki/File:Parent_helping_child_learning_to_ride_a_bike.jpg" target="_blank" rel="noopener noreferrer">Wikimedia Commons</a></em>
+</div>
+
 你不会先递给他一本《自行车物理学与平衡方程》，也不会在他上车前规定"当车身向左倾斜 5 度时右脚施力 10 牛顿"。你只是扶着后座，鼓励他自己去蹬。摔了，擦伤的膝盖就是负面反馈；稳了，迎面吹来的风就是奖励。几次下来，他的大脑在试错中自动学会了调整重心。
 
 这种能力——**在未知环境中通过试错来学习，以最终的回报为导向**——是所有生物最本能的学习方式。可奇怪的是，过去十年的人工智能恰恰绕开了它。我们教会了机器认猫认狗、翻译语言、生成图片，用的全是同一种方法：给它成千上万个标注好的正确答案，让它照着学。但当问题从"识别"变成"决策"——让机械臂抓取水杯，让 AI 在星际争霸中打败职业选手，或者让大语言模型学会得体地回答问题——你根本无法为每一步标注出标准答案。
 
 面对这些需要在动态变化中做连续决策的难题，**强化学习（Reinforcement Learning, RL）提供了一套截然不同的思路：不告诉 AI 怎么做，只告诉它什么好、什么不好，剩下的让它自己摸索。**从 Q-Learning 到 DQN，从 PPO 到 DPO 和 GRPO——强化学习的每一次进化，都在不断拓宽人工智能的能力边界。
 
-```mermaid
-graph LR
-    subgraph 监督学习
-        SL_D["数据集<br/>（图片 + 标签）"] --> SL_M["模型"]
-        SL_M --> SL_P["预测"]
-        SL_L["标准答案"] -.->|"对比误差"| SL_M
-    end
-    subgraph 强化学习
-        RL_A["智能体"] -->|"动作"| RL_E["环境"]
-        RL_E -->|"状态 + 奖励"| RL_A
-    end
-    style SL_D fill:#e3f2fd,stroke:#1976d2,color:#000
-    style SL_L fill:#e3f2fd,stroke:#1976d2,color:#000
-    style RL_A fill:#fff3e0,stroke:#f57c00,color:#000
-    style RL_E fill:#fff3e0,stroke:#f57c00,color:#000
-```
-
 本书将带你亲手用代码重走这段旅程。从最基础的倒立摆（CartPole），一路走到如何用 RL 激发大语言模型的推理能力。这不仅是一门技术，更是一种理解智能如何涌现的全新视角。
 
 ![CartPole 倒立摆环境：小车通过左右移动来保持杆子竖直平衡](/images/cartpole.gif)
 
-> 图源：[Gymnasium - CartPole](https://gymnasium.farama.org/environments/classic_control/cart_pole/)
+<div style="text-align: center; font-size: 0.9em; color: var(--vp-c-text-2); margin-top: -10px; margin-bottom: 20px;">
+  <em>图 2：CartPole 倒立摆环境：小车通过左右移动来保持杆子竖直平衡。图源：<a href="https://gymnasium.farama.org/environments/classic_control/cart_pole/" target="_blank" rel="noopener noreferrer">Gymnasium</a></em>
+</div>
 
 ## 什么是强化学习？
 
@@ -45,11 +36,15 @@ graph LR
 
 强化学习的交互过程是一个不断重复的循环：
 
+<div align="center" style="margin: 2.5rem 0;">
+
 ```mermaid
 graph LR
     A["智能体 Agent"] -->|"动作 aₜ"| B["环境 Environment"]
     B -->|"状态 sₜ₊₁ + 奖励 rₜ₊₁"| A
 ```
+
+</div>
 
 1. 智能体观察到当前状态 $s_t$，选择动作 $a_t$
 2. 环境执行动作，转移到新状态 $s_{t+1}$，返回奖励 $r_{t+1}$
@@ -65,6 +60,8 @@ $$G_t = r_{t+1} + \gamma\, r_{t+2} + \gamma^2\, r_{t+3} + \cdots = \sum_{k=0}^{\
 
 $\gamma$ 接近 1 表示重视长期回报，接近 0 表示只顾眼前。
 
+<div align="center" style="margin: 2.5rem 0;">
+
 ```mermaid
 graph LR
     S["起点 🐭"] -->|"1 步<br/>r = +1"| C1["小奶酪 🧀"]
@@ -77,7 +74,15 @@ graph LR
     style CAT fill:#fafafa,stroke:#9e9e9e,color:#000
 ```
 
+</div>
+
 > γ ≈ 0 时智能体倾向直奔小奶酪；γ ≈ 1 时愿意冒险绕路去拿大奶酪。
+
+![Maze Mouse Cheese](/images/maze_mouse_cheese.jpg)
+
+<div style="text-align: center; font-size: 0.9em; color: var(--vp-c-text-2); margin-top: -10px; margin-bottom: 20px;">
+  <em>图 3：老鼠走迷宫寻找奶酪，是强化学习中常用的寻路与决策模型。来源：<a href="https://commons.wikimedia.org/wiki/File:MAZE_Mouse_Cheese.jpg" target="_blank" rel="noopener noreferrer">Wikimedia Commons</a></em>
+</div>
 
 整个 RL 大厦建立在一个哲学立场——**奖励假设**——之上：所有目标都可以描述为"最大化期望累积奖励"。只要能把"好"和"坏"量化成数字信号，RL 就有办法让智能体学会。
 
@@ -97,6 +102,27 @@ RL 还面临一个核心困境——**探索与利用（Exploration vs. Exploita
 
 两条路线各有短板：路线一擅长打分但不擅长探索，路线二擅长探索但打分不够准。**Actor-Critic** 把两者拼在一起——用路线一的方法训练一个"评委"（Critic）来评估每个动作的好坏，再用路线二的方法训练一个"演员"（Actor）来选动作。评委的评分越准，演员的进步就越快；演员尝试的新动作越多，评委的评分也越准。
 
+<div align="center" style="margin: 2.5rem 0;">
+
+```mermaid
+graph TD
+    A["环境 (Environment)"] -->|"状态 s"| B["演员 (Actor)<br/>决定动作 a"]
+    A -->|"状态 s"| C["评委 (Critic)<br/>估计价值 V(s)"]
+    A -->|"奖励 r"| C
+    B -->|"动作 a"| A
+    C -->|"TD 误差 (打分)"| B
+    
+    style A fill:#fff3e0,stroke:#f57c00,color:#000
+    style B fill:#e3f2fd,stroke:#1976d2,color:#000
+    style C fill:#e8f5e9,stroke:#388e3c,color:#000
+```
+
+</div>
+
+<div style="text-align: center; font-size: 0.9em; color: var(--vp-c-text-2); margin-top: -10px; margin-bottom: 20px;">
+  <em>图 4：Actor-Critic 架构示意图：演员（Actor）负责执行动作，评委（Critic）负责根据环境奖励为动作打分并指导演员改进。</em>
+</div>
+
 最后一个问题：这些"打分表"和"行为手册"具体长什么样？简单环境下可以是一张小表格，查表就行。但像 Atari 游戏那样，一帧画面就有几十万个像素，表格根本装不下。**深度强化学习（Deep RL）**的做法是用神经网络来代替表格——如果神经网络学的是"打分表"，它就是 Value-Based（如 DQN）；如果学的是"行为手册"，它就是 Policy-Based（如 REINFORCE）；如果同时学两者，它就是 Actor-Critic（如 PPO）。本书所有算法都属于 Deep RL。
 
 ---
@@ -107,24 +133,11 @@ RL 还面临一个核心困境——**探索与利用（Exploration vs. Exploita
 
 2016 年，AlphaGo 击败李世石，强化学习第一次震撼公众。2022 年 ChatGPT 发布，人们发现 RL 正是让大语言模型从"能说话"变成"说好话"的关键技术。从 DeepSeek-R1 到各类开源对齐模型，RLHF、DPO、GRPO 等算法已经深刻地重塑了整个 AI 行业。
 
-```mermaid
-timeline
-    title 强化学习里程碑
-    2013 : DeepMind 发布 DQN
-         : 深度学习 × RL 的起点
-    2016 : AlphaGo 击败李世石
-         : RL 首次震撼公众
-    2017 : PPO 算法提出
-         : 成为最广泛使用的 RL 算法
-    2020 : RLHF 用于 GPT 系列
-         : RL 进入大语言模型时代
-    2022 : ChatGPT 发布
-         : RLHF 成为行业标配
-    2023 : DPO 提出
-         : 简化对齐流程，绕过奖励模型
-    2025 : DeepSeek-R1 / GRPO
-         : 组相对策略优化，RL + 可验证奖励
-```
+![ChatGPT](/images/chatgpt.png)
+
+<div style="text-align: center; font-size: 0.9em; color: var(--vp-c-text-2); margin-top: -10px; margin-bottom: 20px;">
+  <em>图 5：ChatGPT 等大语言模型的崛起，标志着强化学习在人类偏好对齐和复杂推理上的成功。来源：<a href="https://commons.wikimedia.org/wiki/File:ChatGPT.png" target="_blank" rel="noopener noreferrer">Wikimedia Commons</a></em>
+</div>
 
 然而，市面上的学习资源严重滞后于行业实践。主流教程对 RL 一笔带过，专门的 RL 教材又停留在传统框架，对 PPO、DPO、GRPO 只字不提。一个想要理解 RLHF 流程的工程师，不得不在经典教材和最新论文之间艰难地自行搭建桥梁。我们着手写这本书，就是为了填补这道鸿沟。
 
@@ -143,6 +156,8 @@ timeline
 ### 内容和结构
 
 全书大致可分为四个部分，在下图的核心脉络中用不同的颜色呈现：
+
+<div align="center" style="margin: 2.5rem 0;">
 
 ```mermaid
 graph TD
@@ -168,6 +183,8 @@ graph TD
     style I fill:#fce4ec,stroke:#c62828,color:#000
     style J fill:#fce4ec,stroke:#c62828,color:#000
 ```
+
+</div>
 
 上图是全书算法的主线。左侧蓝色分支是 **Value-Based**——先估计每个动作能得多少分，再选得分最高的；右侧橙色分支是 **Policy-Based**——跳过打分，直接学习在什么状态下该做什么动作。两条路线在 Actor-Critic 处合流，由此长出 PPO，而 PPO 正是后续所有 LLM 对齐算法的骨架。
 

@@ -174,3 +174,13 @@ mjx-container[display='true'] {
   max-width: 100%;
   border-radius: 8px;
 }
+
+/* Center mermaid diagrams and add spacing */
+.vp-doc .mermaid,
+.vp-doc pre.mermaid,
+.vp-doc div[class*="mermaid"],
+.mermaid-wrapper {
+  display: flex;
+  justify-content: center;
+  margin: 2.5rem 0;
+}
