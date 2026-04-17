@@ -225,6 +225,65 @@ flowchart LR
 
 </details>
 
+<details>
+<summary><strong>思考题四（选读）：DPO 和 PPO 的等价性推导——奖励模型为什么可以跳过？</strong></summary>
+
+前面我们说了"奖励分数正比于概率比的对数"，但没有解释这个等价关系是怎么来的。这里给出完整的推导思路，需要的数学工具只有对数和求导。
+
+---
+
+**起点：PPO 的优化目标**
+
+PPO 对齐语言模型时，目标是最大化奖励，同时加了一个约束：策略不能偏离原始模型太远。这个约束用 KL 散度来度量，可以写成如下优化问题：
+
+$$\max_{\pi_\theta} \; \mathbb{E}_{x, y \sim \pi_\theta}\left[r(x, y)\right] - \beta \, D_{\text{KL}}\left(\pi_\theta(\cdot|x) \;\|\; \pi_{\text{ref}}(\cdot|x)\right)$$
+
+其中 $r(x,y)$ 是奖励模型给回答打的分数，$\beta$ 控制约束强度，$D_{\text{KL}}$ 衡量两个分布的差异。
+
+---
+
+**第一步：写出 KL 散度的展开形式**
+
+KL 散度的定义是：
+
+$$D_{\text{KL}}(\pi_\theta \| \pi_{\text{ref}}) = \mathbb{E}_{y \sim \pi_\theta}\left[\log \frac{\pi_\theta(y|x)}{\pi_{\text{ref}}(y|x)}\right]$$
+
+代入优化目标，把期望合并：
+
+$$\max_{\pi_\theta} \; \mathbb{E}_{y \sim \pi_\theta}\left[r(x, y) - \beta \log \frac{\pi_\theta(y|x)}{\pi_{\text{ref}}(y|x)}\right]$$
+
+---
+
+**第二步：对每个回答 $y$ 逐项优化**
+
+这是一个关于分布 $\pi_\theta$ 的约束优化问题（$\pi_\theta$ 的概率之和为 1）。用拉格朗日乘子法求解，对 $\pi_\theta(y|x)$ 逐项求导并令其等于零，可以得到闭式解：
+
+$$\pi^*(y|x) \propto \pi_{\text{ref}}(y|x) \cdot \exp\!\left(\frac{1}{\beta} r(x, y)\right)$$
+
+这个结果的含义是：最优策略在参考策略的基础上，按 $\exp(r/\beta)$ 对每个回答的概率进行重新加权。奖励越高，概率被放大越多。
+
+---
+
+**第三步：反解奖励**
+
+把上面的等式两边取对数，整理得到：
+
+$$r(x, y) = \beta \log \frac{\pi^*(y|x)}{\pi_{\text{ref}}(y|x)} + \beta \log Z(x)$$
+
+其中 $Z(x) = \sum_y \pi_{\text{ref}}(y|x) \exp(r(x,y)/\beta)$ 是归一化常数（与具体的 $y$ 无关，只依赖于提示词 $x$）。
+
+关键观察：$\beta \log Z(x)$ 这一项对于同一个提示词 $x$ 下的所有回答都是相同的。在 DPO 中，我们比较的是同一个 $x$ 下好回答和坏回答的奖励之差，所以常数项会被消掉：
+
+$$r(x, y_w) - r(x, y_l) = \beta \log \frac{\pi^*(y_w|x)}{\pi_{\text{ref}}(y_w|x)} - \beta \log \frac{\pi^*(y_l|x)}{\pi_{\text{ref}}(y_l|x)}$$
+
+---
+
+**结论**
+
+奖励差完全由两个模型的概率比值决定，不依赖外部的奖励模型。这就是 DPO 能跳过奖励模型的数学依据。把这个奖励差代入 Bradley-Terry 偏好模型（人类选择 $y_w$ 而非 $y_l$ 的概率），再取负对数，就得到了正文中推导的 DPO 损失函数。
+
+</details>
+
 ## 参考文献
 
 [^1]: Christiano, P. F., et al. (2017). Deep reinforcement learning from human preferences. _Advances in Neural Information Processing Systems_, 30. [在线阅读](https://arxiv.org/abs/1706.03741)
