@@ -234,6 +234,10 @@ const zhSidebar = {
           items: [
             { text: '章节导览', link: '/chapter10_rlhf/intro' },
             {
+              text: '动手：亲手制造一场 Reward Hacking',
+              link: '/chapter10_rlhf/reward-hacking-hands-on'
+            },
+            {
               text: '模仿学习与数据工程',
               link: '/chapter10_rlhf/imitation-learning-pipeline'
             },
@@ -287,6 +291,10 @@ const zhSidebar = {
           collapsed: false,
           items: [
             { text: '章节导览', link: '/chapter12_agentic_rl/intro' },
+            {
+              text: '动手：Mini Agent Loop——ORM vs PRM 对比',
+              link: '/chapter12_agentic_rl/agent-loop-hands-on'
+            },
             {
               text: '多轮交互 RL 与信用分配',
               link: '/chapter12_agentic_rl/multi-turn-rl'

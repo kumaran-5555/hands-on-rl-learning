@@ -50,7 +50,7 @@
   </url>
   <url>
     <loc>https://walkinglabs.github.io/hands-on-modern-rl/appendix_industrial_training/agentic-rl-infra/</loc>
-    <lastmod>2026-04-19T06:07:20.681Z</lastmod>
+    <lastmod>2026-04-19T07:01:25.260Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -512,7 +512,7 @@
   </url>
   <url>
     <loc>https://walkinglabs.github.io/hands-on-modern-rl/chapter10_rlhf/intro/</loc>
-    <lastmod>2026-04-19T06:36:50.428Z</lastmod>
+    <lastmod>2026-04-19T07:24:12.329Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -523,8 +523,14 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://walkinglabs.github.io/hands-on-modern-rl/chapter10_rlhf/reward-hacking-hands-on/</loc>
+    <lastmod>2026-04-19T07:32:00.690Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://walkinglabs.github.io/hands-on-modern-rl/chapter10_rlhf/rlaif-and-data-cycle/</loc>
-    <lastmod>2026-04-19T06:36:15.785Z</lastmod>
+    <lastmod>2026-04-19T06:55:39.165Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -536,7 +542,7 @@
   </url>
   <url>
     <loc>https://walkinglabs.github.io/hands-on-modern-rl/chapter10_rlhf/training-stability-hacking/</loc>
-    <lastmod>2026-04-19T06:37:06.444Z</lastmod>
+    <lastmod>2026-04-19T06:55:51.121Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -571,8 +577,14 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://walkinglabs.github.io/hands-on-modern-rl/chapter12_agentic_rl/agent-loop-hands-on/</loc>
+    <lastmod>2026-04-19T07:30:31.599Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://walkinglabs.github.io/hands-on-modern-rl/chapter12_agentic_rl/agentic-engineering/</loc>
-    <lastmod>2026-04-19T06:14:40.836Z</lastmod>
+    <lastmod>2026-04-19T07:00:38.762Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -584,13 +596,13 @@
   </url>
   <url>
     <loc>https://walkinglabs.github.io/hands-on-modern-rl/chapter12_agentic_rl/evaluation-benchmarks/</loc>
-    <lastmod>2026-04-19T06:41:22.366Z</lastmod>
+    <lastmod>2026-04-19T07:01:34.674Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://walkinglabs.github.io/hands-on-modern-rl/chapter12_agentic_rl/extended-readings/</loc>
-    <lastmod>2026-04-19T06:41:52.257Z</lastmod>
+    <lastmod>2026-04-19T07:02:06.158Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -602,7 +614,7 @@
   </url>
   <url>
     <loc>https://walkinglabs.github.io/hands-on-modern-rl/chapter12_agentic_rl/intro/</loc>
-    <lastmod>2026-04-19T06:13:50.918Z</lastmod>
+    <lastmod>2026-04-19T07:20:53.779Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -614,7 +626,7 @@
   </url>
   <url>
     <loc>https://walkinglabs.github.io/hands-on-modern-rl/chapter12_agentic_rl/tool-use-agents/</loc>
-    <lastmod>2026-04-19T06:13:12.399Z</lastmod>
+    <lastmod>2026-04-19T07:01:57.673Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -638,7 +650,7 @@
   </url>
   <url>
     <loc>https://walkinglabs.github.io/hands-on-modern-rl/chapter13_future_trends/llm-multi-agent-rl/</loc>
-    <lastmod>2026-04-19T06:11:51.895Z</lastmod>
+    <lastmod>2026-04-19T07:01:15.720Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
