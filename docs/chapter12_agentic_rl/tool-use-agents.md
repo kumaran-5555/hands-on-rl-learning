@@ -348,7 +348,7 @@ def tool_rl_training_loop(
 
 [^retool]: Feng J, et al. "[ReTool: Reinforcement Learning for Strategic Tool Use in LLMs](https://arxiv.org/abs/2504.11536)." arXiv:2504.11536, 2025. —— 用 RL 优化推理过程中的工具调用策略。
 
-[^toolrl]: Qian C, Acikgoz EC, et al. "[ToolRL: Reward is All Tool Learning Needs](https://arxiv.org/abs/2504.13958)." arXiv:2504.13958, 2025. —— 将工具调用视为 RL 中的特殊动作，扩展策略的动作空间。
+[^toolrl]: Qian C, Acikgoz EC, et al. "[ToolRL: Reward is All Tool Learning Needs](https://arxiv.org/abs/2504.13958)." NeurIPS 2025. —— 将工具调用视为 RL 中的特殊动作，扩展策略的动作空间。
 
 [^verltool]: verl-tool Team. "[verl-tool](https://github.com/volcengine/verl-tool)." GitHub, 2025. —— VeRL 的工具调用增强版，跨领域工具调用 RL 训练框架。
 
@@ -369,8 +369,6 @@ def tool_rl_training_loop(
 [^searchr1]: Jin B, et al. "[Search-R1: Training LLMs to Reason and Leverage Search Engines with Reinforcement Learning](https://arxiv.org/abs/2503.09516)." arXiv:2503.09516, 2025. 819 次引用。首次将搜索工具使用建模为 RL 问题。[GitHub](https://github.com/PeterGriffinJin/Search-R1)
 
 [^torl]: Li X, et al. "[ToRL: Scaling Tool-Integrated RL](https://arxiv.org/abs/2503.23383)." arXiv:2503.23383, 2025. 131 次引用。将工具使用 RL 扩展到计算工具，发现工具使用的 Scaling Law。
-
-[^retool]: Feng J, et al. "[ReTool: Reinforcement Learning for Strategic Tool Use in LLMs](https://arxiv.org/abs/2504.11536)." arXiv:2504.11536, 2025. 247 次引用。策略性工具调用的 RL 框架。
 
 [^research]: Chen M, et al. "[ReSearch: Learning to Reason with Search for LLMs via Reinforcement Learning](https://arxiv.org/abs/2503.19470)." arXiv:2503.19470, 2025. 推理与搜索深度融合框架。
 
