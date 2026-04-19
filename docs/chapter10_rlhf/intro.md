@@ -16,9 +16,10 @@
 
 | 小节                                                 | 你会回答的问题                                         |
 | ---------------------------------------------------- | ------------------------------------------------------ |
+| [动手：亲手制造一场 Reward Hacking](./reward-hacking-hands-on) | 奖励函数有漏洞会怎样？怎么检测和修复？                 |
 | [模仿学习与数据工程](./imitation-learning-pipeline)  | SFT 和 RM 的理论基础是什么？数据怎么构造和清洗？       |
 | [奖励函数设计](./reward-function-design)             | 规则奖励和模型奖励怎么选？Bradley-Terry 模型怎么工作？ |
 | [训练稳定性与奖励黑客](./training-stability-hacking) | 怎么让 RLHF 训练不崩溃？怎么发现和防范奖励黑客？       |
 | [自我博弈与数据飞轮](./rlaif-and-data-cycle)  | 能不能用 AI 替代人类标注？数据怎么持续迭代？           |
 
-准备好了吗？让我们从模仿学习的理论基础开始——[模仿学习与数据工程](./imitation-learning-pipeline)。
+准备好了吗？让我们先亲手制造一场 Reward Hacking——[动手：亲手制造一场 Reward Hacking](./reward-hacking-hands-on)。
