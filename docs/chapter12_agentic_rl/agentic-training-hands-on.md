@@ -1101,30 +1101,105 @@ plt.savefig("on_vs_off_policy_real_benchmark.png", dpi=150)
 print("On vs Off comparison saved")
 ```
 
-## 框架选择与扩展
+## 参考：真正在做 Agentic RL 训练的开源项目
 
-上面的训练循环是教育目的的简化版。如果你要扩展到更大规模（完整 HumanEval 164 题、更大模型），推荐使用生产级框架：
+上面的实验是教学版。如果你想看**生产级**的"搭工具环境 → rollout 多轮轨迹 → 用轨迹训练模型"的完整实现，以下项目都开源了代码，可以直接跑：
 
-| 框架         | 用途             | 命令                                              |
-| ------------ | ---------------- | ------------------------------------------------- |
-| **veRL**     | 单机 GRPO 训练   | `pip install verl`                                |
-| **verl-tool** | 工具调用 RL    | `pip install verl-tool`（veRL + 工具环境）         |
-| **Agent-R1** | 多轮 Agentic RL  | `pip install agent-r1`                            |
-| **AReaL**    | 分布式异步训练   | `pip install areal`（多机场景）                   |
+### SimpleTIR——代码执行 + 多轮推理
 
-用 veRL 跑同样的实验：
+[ltzheng/SimpleTIR](https://github.com/ltzheng/SimpleTIR) | ICLR 2026
 
-```bash
-# 使用 veRL 的 GRPO Trainer
-python -m verl.trainer.main_ppo \
-    --model.path Qwen/Qwen2.5-Coder-1.5B-Instruct \
-    --reward.model.type function \
-    --reward.model.path humaneval_reward.py \
-    --data.path humaneval_train.jsonl \
-    --actor.optim.lr 5e-6 \
-    --rollout.n 4 \
-    --trainer.total_epochs 3
+和我们实验最接近的参考。模型在推理过程中写 Python 代码，沙箱执行后返回结果，模型根据结果继续推理或修正。关键贡献是 **void turn 过滤**：如果某轮模型既没有产出有效代码块也没有给答案，整条轨迹被丢弃（不参与梯度计算），防止 OOD token 导致梯度爆炸。
+
+- **工具环境**：代码执行沙箱（Sandbox Fusion），支持异步 256 路并行
+- **Rollout**：最多 5 轮（训练）/ 10 轮（评测），每轮模型写代码 → 沙箱执行 → 返回 stdout/stderr
+- **训练**：GRPO + DAPO 增强（off-policy、clip high、动态采样），基于 veRL
+- **结果**：Qwen2.5-7B 在 AIME24 上从 **22.1 提升到 50.5**（SOTA）
+- **轨迹处理**：双张量 `info_mask`，工具返回 token 替换为 pad_id，不参与 loss 和 KL 计算
+
+### ReTool——推理中策略性调用代码解释器
+
+[ReTool-RL/ReTool](https://github.com/ReTool-RL/ReTool) | 字节跳动 Seed
+
+两阶段管线：先用合成数据做冷启动 SFT，再用 RL 训练模型在推理中策略性地调用代码解释器。关键发现是模型通过 RL 学会了**因地制宜**——简单算术直接口算，复杂计算才调解释器。
+
+- **工具环境**：代码解释器（Python 执行器）
+- **Rollout**：推理中穿插代码块，执行后结果追加到上下文，模型继续推理
+- **训练**：冷启动 SFT → RL（outcome reward），基于 veRL
+- **结果**：Qwen2.5-32B 在 AIME 2024 上 **67%**，400 步 RL 即达到
+
+### Search-R1——RL 训练模型自主搜索
+
+[PeterGriffinJin/Search-R1](https://github.com/PeterGriffinJin/Search-R1) | COLM 2025
+
+搜索工具 RL 的标杆项目。模型在推理过程中自主决定何时搜索、搜什么，搜索引擎返回结果后继续推理。核心技术创新是 **retrieved token loss masking**：搜索返回的 token 在 GRPO loss 中被 mask 掉（`I(y_t) = 0`），只有模型自己生成的 token 参与 policy gradient。
+
+- **工具环境**：搜索引擎服务器（BM25 / dense retriever / 在线 API）
+- **Rollout**：`think → <search>query</search> → 搜索结果 → think → ... → <answer>`
+- **训练**：PPO 或 GRPO，搜索结果 token 不参与 loss
+- **结果**：Qwen2.5-7B 在 7 个 QA 数据集上平均 **0.431**（无 mask 只有 0.343）
+
+### DeepSWE / rLLM——纯 RL 训练 SWE-bench Agent
+
+[agentica-project/rllm](https://github.com/agentica-project/rllm) | Together AI
+
+目前 SWE-bench 上最强的开源方案。从 Qwen3-32B 出发，**完全不用 SFT**，纯 RL 训练约 200 步就在 SWE-bench Verified 上达到 42.2%。每条轨迹在一个 Docker 容器中运行完整 agent loop（最多 100 步）。
+
+- **工具环境**：Docker 容器 + 完整测试套件（Bash / Search / File Editor / Submit）
+- **Rollout**：多步 agent 交互，每步在 Docker 中执行动作
+- **训练**：GRPO++（7 项增强：clip high、no KL、length norm、leave-one-out、compact filtering 等）
+- **结果**：SWE-bench Verified **42.2%**，约 200 步 RL，64×H100 训练 6 天
+
+### VerlTool——通用工具调用 RL 框架
+
+[TIGER-AI-Lab/verl-tool](https://github.com/TIGER-AI-Lab/verl-tool) | ICLR 2026 Workshop | 951 stars
+
+最成熟的通用工具调用 RL 框架。在 veRL 之上封装了标准化的工具服务器接口，支持代码执行、搜索、SQL、NL2SQL 等多种工具，添加新工具只需一个 Python 文件。支持同步和异步 rollout（异步至少 2x 加速）。
+
+- **工具环境**：插件式工具服务器，工具即环境（environment state per trajectory）
+- **Rollout**：原生多轮交互，actor rollout 和环境交互完全解耦
+- **训练**：GRPO + 多种训练 recipe（ToRL、Search-R1 复现、DAPO、NL2SQL）
+- **结果**：搜索任务上复现并超越 Search-R1
+
+### 其他值得关注的
+
+| 项目 | 特色 | 链接 |
+| ---- | ---- | ---- |
+| **Agent-R1** | Step-level MDP，避免 retokenization drift | [GitHub](https://github.com/AgentR1/Agent-R1) |
+| **WebAgent-R1** | 真实网页交互（WebArena），EMNLP 2025 | [GitHub](https://github.com/weizhepei/WebAgent-R1) |
+| **AutoTIR** | 模型自主决定何时用何工具 | [GitHub](https://github.com/weiyifan1023/AutoTIR) |
+| **AgentRL** | 多任务 agentic RL，AgentBench 8 环境 | [GitHub](https://github.com/THUDM/AgentRL) |
+| **R1-Searcher** | 两阶段搜索 RL（先学调用，再学利用） | [GitHub](https://github.com/RUCAIBox/R1-Searcher) |
+| **Awesome 列表** | 120+ 篇 Agentic RL 论文索引 | [GitHub](https://github.com/xhyumiracle/Awesome-AgenticLLM-RL-Papers) |
+
+### 这些项目的共同模式
+
+尽管工具不同（搜索、代码执行、网页交互），所有项目的训练管线都遵循同一套架构：
+
+```mermaid
+flowchart TD
+    T["任务集"] --> R["Rollout Engine"]
+    R --> M["模型生成\nassistant tokens"]
+    M --> E["工具环境执行\n返回 observation"]
+    E --> D{"完成？"}
+    D -->|"否"| M
+    D -->|"是"| RE["Reward 评估\n（测试通过？答案正确？）"]
+    RE --> MASK["构建 info_mask\n（工具 token → mask）"]
+    MASK --> GRPO["GRPO / PPO\n只在 assistant token 上算 loss"]
+    GRPO -->|更新模型| M
+
+    style M fill:#e3f2fd,stroke:#1976d2,color:#000
+    style E fill:#fff3e0,stroke:#f57c00,color:#000
+    style RE fill:#e8f5e9,stroke:#2e7d32,color:#000
+    style MASK fill:#fce4ec,stroke:#c62828,color:#000
+    style GRPO fill:#f3e5f5,stroke:#7b1fa2,color:#000
 ```
+
+1. **构建工具环境**（沙箱、搜索引擎、浏览器……）
+2. **模型与环境多轮交互**（rollout），产出完整轨迹 `[prompt, assistant, tool_result, assistant, tool_result, ...]`
+3. **计算 outcome reward**（测试通过？答案正确？）
+4. **构建 token mask**（工具返回的 token 不参与 loss）
+5. **GRPO/PPO 训练**，只在 assistant token 上计算 policy gradient
 
 ## 实验总结
 
@@ -1178,13 +1253,13 @@ def generate_completion_api(prompt: str, temperature: float = 0.0) -> str:
 
 SWE-bench 和 HumanEval 有三个关键差异：
 
-1. **仓库级别**：SWE-bench 的任务涉及整个 git 仓库（多文件），需要 `git checkout`、`grep`、`cat` 等工具，环境搭建更复杂。推荐用 [SWE-agent](https://github.com/princeton-nlp/SWE-agent) 的环境。
+1. **仓库级别**：SWE-bench 的任务涉及整个 git 仓库（多文件），需要 `git checkout`、`grep`、`cat` 等工具，环境搭建更复杂。推荐直接参考 [DeepSWE/rLLM](https://github.com/agentica-project/rllm) 的 Docker 环境方案。
 
-2. **评测方式**：SWE-bench 用 `git diff` + `pytest` 验证，不是简单的函数测试。需要用 [SWE-bench-harness](https://github.com/aorwall/SWE-bench-harness) 跑评测。
+2. **评测方式**：SWE-bench 用 `git diff` + `pytest` 验证，不是简单的函数测试。
 
 3. **轨迹长度**：SWE-bench 任务需要 20-50 轮交互，远超 HumanEval 的 3 轮。GRPO 的 group_size 需要增大（8-16），训练时间显著增加。
 
-扩展路径：先用 HumanEval 验证管线 → 再用 SWE-bench Lite（300 题）做真实评测 → 最后尝试完整 SWE-bench。
+扩展路径：先用 HumanEval 验证管线 → 参考 DeepSWE 的 SWE-bench 实现 → 用 [SWE-bench Verified](https://www.swebench.com/verified.html)（500 题）做真实评测。
 
 </details>
 
