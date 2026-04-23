@@ -20,13 +20,21 @@ RL 的训练循环是**动态**的：
 
 关键区别：**训练数据是策略自己生成的**。这意味着采样速度直接决定训练速度，环境交互往往是瓶颈。
 
+更工程一点地说，RL 系统的吞吐由三类速率共同决定：
+
+- 采样端能产出多少数据（`steps/s` 或 `tokens/s`）
+- 训练端能消化多少数据（每步训练的 batch size、并行策略、反向速度）
+- 奖励/环境反馈有多快（环境 step、判题、Reward Model/Judge 推理）
+
+它们只要有一块跟不上，最终吞吐就会被那一块“卡死”。后续 B.2（异步训练）和 B.6（监控与排障）基本都在围绕这个矛盾做工程化处理。
+
 ## 阶段一：单机 RL（Gymnasium）
 
 **场景**：CartPole、LunarLander、学术实验
 
 **瓶颈**：单环境太慢，GPU 大部分时间在等 CPU 做环境 step。
 
-**解法——向量化环境**：
+**解法——向量化环境（vectorized env）**：
 
 ```python
 from gymnasium.vector import SyncVectorEnv, AsyncVectorEnv
@@ -76,6 +84,8 @@ Isaac Gym： GPU 物理仿真 × 4096 环境 + GPU 策略推理（全在 GPU 上
 
 **Sample Factory 极致吞吐**：异步 Actor-Learner 架构，Actor 进程持续收集轨迹，Learner 进程持续更新策略，共享内存零拷贝。Atari 上可达 100K+ fps。
 
+如果你把“并行环境”继续往上推，会很快遇到 Python 调度/进程通信的天花板。下一步通常是把系统拆成 Actor（采样）和 Learner（训练）两类进程：Actor 只负责把轨迹稳定地喂出来，Learner 只负责把 GPU 吃满。这类解耦架构的代表之一是 IMPALA。  
+
 ## 阶段三：LLM RL 采样基础设施
 
 **场景**：PPO/GRPO 训练 LLM（7B-70B）
@@ -101,6 +111,13 @@ Isaac Gym： GPU 物理仿真 × 4096 环境 + GPU 策略推理（全在 GPU 上
 
 vLLM 的 PagedAttention 把 KV Cache 管理起来，使批量推理吞吐量提升 2-4x。
 
+在 LLM RL 里，“采样”基本等价于“自回归生成”。生成的成本由两部分组成：
+
+- prefill（把 prompt 喂进模型）：接近线性随 prompt 长度增长
+- decode（逐 token 生成）：接近线性随生成长度增长，但更难 batch，通常更贵
+
+当你把 GRPO 的 `k`（每个 prompt 采样多少条回答）和长输出（2K-32K token）叠加起来，rollout 很容易变成系统的绝对瓶颈。
+
 生成阶段消耗 >90% 的训练时间，推理和训练必须并发运行。这涉及三种部署模式（同步 / Colocated / Disaggregated）、权重同步、数据过期管理等关键设计——这些在 **[B.2 异步训练架构](./async-training)** 中展开。
 
 模型如何分布式地切到多张卡上，详见 **[B.3 分布式并行策略](./parallelism)**。
@@ -122,16 +139,26 @@ CPU 采样 + GPU 训练      Sample Factory           Ray 分布式编排
 
 **选型决策**：
 
-- 环境轻量 + 单卡能装下模型 → 阶段一（TRL / CleanRL）
+- 环境轻量 + 单卡能装下模型 → 阶段一（Gymnasium + CleanRL；LLM 原型可用 TRL）
 - 环境重 + 需要高吞吐采样 → 阶段二（Sample Factory / Isaac Gym）
 - LLM + 需要大规模 PPO/GRPO → 阶段三（OpenRLHF / veRL）
 
 ## 参考文献
 
-[^1]: HuggingFace Blog, [Async RL Training Landscape — 16 Open-Source Libraries Compared](https://huggingface.co/blog/async-rl-training-landscape), 2026.
+[^gym_vec]: Gymnasium Documentation, [Vector Environments (SyncVectorEnv / AsyncVectorEnv)](https://gymnasium.farama.org/api/vector/).
 
-[^2]: PyTorch Blog, [A Primer on LLM Post-Training](https://pytorch.org/blog/a-primer-on-llm-post-training/), 2025.
+[^impala]: Espeholt L, Soyer H, Munos R, et al. [IMPALA: Scalable Distributed Deep-RL with Importance Weighted Actor-Learner Architectures](https://proceedings.mlr.press/v80/espeholt18a.html), ICML 2018.
 
-[^3]: OpenRLHF, [OpenRLHF: An Easy-to-use, Scalable and High-performance RLHF Framework](https://arxiv.org/abs/2405.11143), EMNLP 2025 Demo.
+[^sf]: Petrenko A, Huang Z, Kumar T, Sukhatme G S, Koltun V. [Sample Factory: Egocentric 3D Control from Pixels at 100000 FPS with Asynchronous Reinforcement Learning](https://arxiv.org/abs/2006.11751), ICML 2020.
 
-[^4]: veRL Project, [HybridFlow: A Flexible and Efficient RL Training Framework](https://github.com/verl-project/verl), ByteDance.
+[^isaac]: Makoviychuk V, Wawrzyniak L, Guo Y, et al. [Isaac Gym: High Performance GPU Based Physics Simulation For Robot Learning](https://research.nvidia.com/labs/srl/publication/makoviychuk-2021-isaac/), NeurIPS 2021 (Datasets and Benchmarks).
+
+[^vllm]: Kwon W, Li Z, Zhuang S, et al. [Efficient Memory Management for Large Language Model Serving with PagedAttention](https://arxiv.org/abs/2309.06180), 2023. (vLLM / PagedAttention)
+
+[^hf_async]: Hugging Face Blog, [Keep the Tokens Flowing: Lessons from 16 Open-Source RL Libraries](https://huggingface.co/blog/async-rl-training-landscape), 2026.
+
+[^pt_primer]: PyTorch Blog, [A Primer on LLM Post-Training](https://pytorch.org/blog/a-primer-on-llm-post-training/), 2025.
+
+[^openrlhf]: OpenRLHF, [OpenRLHF (GitHub) + Technical Report (arXiv:2405.11143)](https://github.com/OpenRLHF/OpenRLHF).
+
+[^hybridflow]: veRL Project, [veRL (GitHub)](https://github.com/verl-project/verl). (相关论文：HybridFlow, arXiv:2409.19256)
