@@ -117,7 +117,7 @@ function renderSearchMarkdown(src) {
       continue
     }
 
-    if (!line || inFence || line.startsWith(':::')) {
+    if (!line || inFence || line.startsWith(':::') || line.startsWith('|')) {
       continue
     }
 

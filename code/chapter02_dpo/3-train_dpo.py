@@ -67,5 +67,5 @@ trainer.train()
 # 训练完成后保存结果
 save_path = "./output/dpo_results/final_model"
 trainer.save_model(save_path)
-print(f"🎉 训练完成！微调后的模型已保存至 {save_path}。")
-print("你可以运行 4-test_after.py 来看看现在的模型会不会'好好说话'了。")
+print(f"训练完成！微调后的模型已保存至 {save_path}。")
+print("你可以运行 4-test_after.py 来看看模型是否学会了'不盲从用户'。")
