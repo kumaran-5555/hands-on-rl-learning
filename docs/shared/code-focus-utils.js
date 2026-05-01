@@ -2,6 +2,8 @@ const keywordSet = new Set([
   'and',
   'as',
   'assert',
+  'async',
+  'await',
   'break',
   'class',
   'continue',
@@ -10,7 +12,6 @@ const keywordSet = new Set([
   'elif',
   'else',
   'except',
-  'False',
   'finally',
   'for',
   'from',
@@ -20,38 +21,80 @@ const keywordSet = new Set([
   'in',
   'is',
   'lambda',
-  'None',
   'nonlocal',
   'not',
   'or',
   'pass',
   'raise',
   'return',
-  'True',
   'try',
   'while',
   'with',
   'yield'
 ])
 
+const constantSet = new Set(['False', 'None', 'True'])
+
 const builtinSet = new Set([
+  'Exception',
+  '__name__',
   'abs',
+  'all',
+  'any',
   'bool',
+  'callable',
   'dict',
+  'dir',
   'enumerate',
+  'filter',
   'float',
+  'getattr',
+  'hasattr',
   'int',
+  'isinstance',
+  'iter',
   'len',
   'list',
+  'map',
   'max',
   'min',
+  'object',
+  'open',
   'print',
+  'property',
   'range',
+  'repr',
   'set',
   'str',
   'sum',
+  'super',
   'tuple',
+  'type',
   'zip'
+])
+
+const operatorSet = new Set([
+  '+',
+  '-',
+  '*',
+  '**',
+  '/',
+  '//',
+  '%',
+  '=',
+  '==',
+  '!=',
+  '<',
+  '<=',
+  '>',
+  '>=',
+  '+=',
+  '-=',
+  '*=',
+  '/=',
+  '->',
+  ':=',
+  '|'
 ])
 
 function escapeHtml(value) {
@@ -66,85 +109,197 @@ function wrap(className, value) {
   return `<span class="${className}">${escapeHtml(value)}</span>`
 }
 
-function highlightPlainCode(value) {
-  const pattern = /(@?[A-Za-z_]\w*|\d+(?:\.\d+)?)/g
-  let html = ''
-  let lastIndex = 0
-  let match
+function isIdentifierStart(char) {
+  return /[A-Za-z_]/.test(char)
+}
 
-  while ((match = pattern.exec(value)) !== null) {
-    const token = match[0]
-    html += escapeHtml(value.slice(lastIndex, match.index))
+function isIdentifierPart(char) {
+  return /[A-Za-z0-9_]/.test(char)
+}
 
-    if (token.startsWith('@')) {
-      html += wrap('py-decorator', token)
-    } else if (keywordSet.has(token)) {
-      html += wrap('py-keyword', token)
-    } else if (builtinSet.has(token)) {
-      html += wrap('py-builtin', token)
-    } else if (/^\d/.test(token)) {
-      html += wrap('py-number', token)
-    } else {
-      html += escapeHtml(token)
+function isDigit(char) {
+  return /\d/.test(char)
+}
+
+function readString(line, index, stringStart) {
+  const quote = line[stringStart]
+  const triple = line.slice(stringStart, stringStart + 3) === quote.repeat(3)
+  let end = stringStart + (triple ? 3 : 1)
+
+  while (end < line.length) {
+    if (line[end] === '\\') {
+      end += 2
+      continue
     }
 
-    lastIndex = match.index + token.length
+    if (triple && line.slice(end, end + 3) === quote.repeat(3)) {
+      end += 3
+      break
+    }
+
+    if (!triple && line[end] === quote) {
+      end += 1
+      break
+    }
+
+    end += 1
   }
 
-  html += escapeHtml(value.slice(lastIndex))
-  return html
+  return { type: 'string', value: line.slice(index, end) }
+}
+
+function getStringStart(line, index) {
+  const threeChars = line.slice(index, index + 3).toLowerCase()
+  const twoChars = line.slice(index, index + 2).toLowerCase()
+
+  if (['fr"', "fr'", 'rf"', "rf'"].includes(threeChars)) return index + 2
+  if (['r"', "r'", 'f"', "f'", 'b"', "b'", 'u"', "u'"].includes(twoChars)) {
+    return index + 1
+  }
+  if (line[index] === '"' || line[index] === "'") return index
+  return -1
+}
+
+function tokenizePythonLine(line) {
+  const tokens = []
+  let index = 0
+
+  while (index < line.length) {
+    const char = line[index]
+
+    if (/\s/.test(char)) {
+      let end = index + 1
+      while (end < line.length && /\s/.test(line[end])) end += 1
+      tokens.push({ type: 'space', value: line.slice(index, end) })
+      index = end
+      continue
+    }
+
+    if (char === '#') {
+      tokens.push({ type: 'comment', value: line.slice(index) })
+      break
+    }
+
+    const stringStart = getStringStart(line, index)
+    if (stringStart >= 0) {
+      const token = readString(line, index, stringStart)
+      tokens.push(token)
+      index += token.value.length
+      continue
+    }
+
+    if (isDigit(char)) {
+      let end = index + 1
+      while (
+        end < line.length &&
+        /[A-Za-z0-9_.]/.test(line[end]) &&
+        !(line[end] === '.' && line[end + 1] === '.')
+      ) {
+        end += 1
+      }
+      tokens.push({ type: 'number', value: line.slice(index, end) })
+      index = end
+      continue
+    }
+
+    if (isIdentifierStart(char)) {
+      let end = index + 1
+      while (end < line.length && isIdentifierPart(line[end])) end += 1
+      tokens.push({ type: 'identifier', value: line.slice(index, end) })
+      index = end
+      continue
+    }
+
+    const twoChar = line.slice(index, index + 2)
+    if (operatorSet.has(twoChar)) {
+      tokens.push({ type: 'operator', value: twoChar })
+      index += 2
+      continue
+    }
+
+    tokens.push({
+      type: operatorSet.has(char) ? 'operator' : 'punctuation',
+      value: char
+    })
+    index += 1
+  }
+
+  return tokens
+}
+
+function previousSignificant(tokens, index) {
+  for (let cursor = index - 1; cursor >= 0; cursor -= 1) {
+    if (tokens[cursor].type !== 'space') return tokens[cursor]
+  }
+  return null
+}
+
+function nextSignificant(tokens, index) {
+  for (let cursor = index + 1; cursor < tokens.length; cursor += 1) {
+    if (tokens[cursor].type !== 'space') return tokens[cursor]
+  }
+  return null
+}
+
+function classifyIdentifier(token, tokens, index) {
+  const previous = previousSignificant(tokens, index)
+  const next = nextSignificant(tokens, index)
+
+  if (constantSet.has(token)) return 'py-constant'
+  if (keywordSet.has(token)) return 'py-keyword'
+  if (previous?.value === '@') return 'py-decorator'
+  if (previous?.value === 'class') return 'py-class'
+  if (previous?.value === 'def') return 'py-function'
+  if (previous?.value === '.') {
+    return next?.value === '(' ? 'py-function' : 'py-property'
+  }
+  if (previous?.value === 'import' || previous?.value === 'from') {
+    return /^[A-Z][A-Za-z0-9_]+$/.test(token) ? 'py-class' : 'py-module'
+  }
+  if (token === 'self' || token === 'cls') return 'py-self'
+  if (builtinSet.has(token)) return 'py-builtin'
+  if (next?.value === '(') return 'py-function'
+  if (/^[A-Z][A-Za-z0-9_]+$/.test(token)) return 'py-class'
+
+  return 'py-variable'
+}
+
+function renderToken(token, tokens, index) {
+  if (token.type === 'space' || token.type === 'punctuation') {
+    return escapeHtml(token.value)
+  }
+
+  if (token.type === 'identifier') {
+    return wrap(classifyIdentifier(token.value, tokens, index), token.value)
+  }
+
+  if (token.type === 'operator') return wrap('py-operator', token.value)
+  return wrap(`py-${token.type}`, token.value)
 }
 
 export function highlightPython(line) {
   if (!line) return '&nbsp;'
 
-  let html = ''
-  let chunk = ''
-  let index = 0
+  const tokens = tokenizePythonLine(line)
+  return tokens
+    .map((token, index) => renderToken(token, tokens, index))
+    .join('')
+}
 
-  function flushChunk() {
-    if (!chunk) return
-    html += highlightPlainCode(chunk)
-    chunk = ''
-  }
+export function scrollCodeLineIntoView(
+  container,
+  lineNumber,
+  { behavior = 'smooth' } = {}
+) {
+  if (!container || !lineNumber) return
 
-  while (index < line.length) {
-    const char = line[index]
+  const line = container.querySelector(`[data-line-number="${lineNumber}"]`)
+  if (!line) return
 
-    if (char === '#') {
-      flushChunk()
-      html += wrap('py-comment', line.slice(index))
-      return html
-    }
+  const targetTop = Math.max(0, line.offsetTop - container.clientHeight * 0.28)
 
-    if (char === '"' || char === "'") {
-      flushChunk()
-      const quote = char
-      let end = index + 1
-
-      while (end < line.length) {
-        if (line[end] === '\\') {
-          end += 2
-          continue
-        }
-
-        if (line[end] === quote) {
-          end += 1
-          break
-        }
-
-        end += 1
-      }
-
-      html += wrap('py-string', line.slice(index, end))
-      index = end
-      continue
-    }
-
-    chunk += char
-    index += 1
-  }
-
-  flushChunk()
-  return html
+  container.scrollTo({
+    top: targetTop,
+    behavior
+  })
 }

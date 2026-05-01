@@ -1,6 +1,9 @@
 <script setup>
-import { computed, ref } from 'vue'
-import { highlightPython } from '../../shared/code-focus-utils.js'
+import { computed, nextTick, ref } from 'vue'
+import {
+  highlightPython,
+  scrollCodeLineIntoView
+} from '../../shared/code-focus-utils.js'
 import dpoCode from '../snippets/dpo-code-map.py?raw'
 
 const props = defineProps({
@@ -18,6 +21,7 @@ const lines = dpoCode.trimEnd().split('\n')
 const hovered = ref(false)
 const pinned = ref(false)
 const suppressHover = ref(false)
+const codePre = ref(null)
 
 const segments = [
   { id: 'A', label: '偏好数据', range: [5, 10] },
@@ -94,6 +98,12 @@ const toggleLabel = computed(() => {
 
 const highlighted = computed(() => new Set(config.value.highlight))
 const activeSegments = computed(() => new Set(config.value.active))
+const primaryFocusLine = computed(() => {
+  if (config.value.highlight?.length) return config.value.highlight[0]
+
+  const [firstRange] = normalizeRanges(config.value.compactRanges)
+  return firstRange?.[0] || 1
+})
 
 function normalizeRanges(ranges) {
   return ranges
@@ -141,15 +151,27 @@ function togglePinned() {
 
   pinned.value = true
   suppressHover.value = false
+  scrollToLine(primaryFocusLine.value)
 }
 
-function expandAndPin() {
+function scrollToLine(lineNumber, behavior = 'smooth') {
+  nextTick(() => {
+    scrollCodeLineIntoView(codePre.value, lineNumber, { behavior })
+  })
+}
+
+function expandAndPin(lineNumber = primaryFocusLine.value) {
   pinned.value = true
   suppressHover.value = false
+  scrollToLine(lineNumber)
 }
 
 function handleMouseEnter() {
-  if (!suppressHover.value) hovered.value = true
+  if (!suppressHover.value) {
+    const wasExpanded = isExpanded.value
+    hovered.value = true
+    if (!wasExpanded) scrollToLine(primaryFocusLine.value, 'auto')
+  }
 }
 
 function handleMouseLeave() {
@@ -187,7 +209,7 @@ function handleMouseLeave() {
         class="dpo-code-focus-segment"
         :class="{ 'is-active': activeSegments.has(segment.id) }"
         type="button"
-        @click="expandAndPin"
+        @click="expandAndPin(segment.range[0])"
       >
         <b>[{{ segment.id }}]</b>
         {{ segment.label }}
@@ -200,6 +222,7 @@ function handleMouseLeave() {
     </button>
 
     <pre
+      ref="codePre"
       class="dpo-code-focus-pre"
       tabindex="0"
       data-lang="python"
@@ -214,6 +237,7 @@ function handleMouseLeave() {
         'is-highlight': row.isHighlight,
         'is-marker': row.isMarker
       }"
+      :data-line-number="row.number"
     ><span class="dpo-code-focus-number">{{ String(row.number).padStart(3, ' ') }}</span><span class="dpo-code-focus-text" v-html="row.html"></span>
 </span></template></code></pre>
   </section>
@@ -396,30 +420,52 @@ function handleMouseLeave() {
 }
 
 .dpo-code-focus-text :deep(.py-keyword) {
-  color: #cf222e;
-  font-weight: 700;
+  color: #0000ff;
+  font-weight: 500;
 }
 
 .dpo-code-focus-text :deep(.py-builtin) {
-  color: #8250df;
+  color: #795e26;
+}
+
+.dpo-code-focus-text :deep(.py-class) {
+  color: #267f99;
+}
+
+.dpo-code-focus-text :deep(.py-function) {
+  color: #795e26;
+}
+
+.dpo-code-focus-text :deep(.py-module),
+.dpo-code-focus-text :deep(.py-variable),
+.dpo-code-focus-text :deep(.py-property),
+.dpo-code-focus-text :deep(.py-self) {
+  color: #001080;
+}
+
+.dpo-code-focus-text :deep(.py-constant) {
+  color: #0000ff;
 }
 
 .dpo-code-focus-text :deep(.py-string) {
-  color: #0a7a3d;
+  color: #a31515;
 }
 
 .dpo-code-focus-text :deep(.py-number) {
-  color: #0550ae;
+  color: #098658;
 }
 
 .dpo-code-focus-text :deep(.py-comment) {
-  color: #6e7781;
+  color: #008000;
   font-style: italic;
 }
 
 .dpo-code-focus-text :deep(.py-decorator) {
-  color: #953800;
-  font-weight: 700;
+  color: #af00db;
+}
+
+.dpo-code-focus-text :deep(.py-operator) {
+  color: #000000;
 }
 
 .dpo-code-focus-line.is-marker {
@@ -442,27 +488,50 @@ function handleMouseLeave() {
 }
 
 .dark .dpo-code-focus-text :deep(.py-keyword) {
-  color: #ff7b72;
+  color: #569cd6;
 }
 
 .dark .dpo-code-focus-text :deep(.py-builtin) {
-  color: #d2a8ff;
+  color: #dcdcaa;
+}
+
+.dark .dpo-code-focus-text :deep(.py-class) {
+  color: #4ec9b0;
+}
+
+.dark .dpo-code-focus-text :deep(.py-function) {
+  color: #dcdcaa;
+}
+
+.dark .dpo-code-focus-text :deep(.py-module),
+.dark .dpo-code-focus-text :deep(.py-variable),
+.dark .dpo-code-focus-text :deep(.py-property),
+.dark .dpo-code-focus-text :deep(.py-self) {
+  color: #9cdcfe;
+}
+
+.dark .dpo-code-focus-text :deep(.py-constant) {
+  color: #569cd6;
 }
 
 .dark .dpo-code-focus-text :deep(.py-string) {
-  color: #a5d6ff;
+  color: #ce9178;
 }
 
 .dark .dpo-code-focus-text :deep(.py-number) {
-  color: #79c0ff;
+  color: #b5cea8;
 }
 
 .dark .dpo-code-focus-text :deep(.py-comment) {
-  color: #8b949e;
+  color: #6a9955;
 }
 
 .dark .dpo-code-focus-text :deep(.py-decorator) {
-  color: #ffa657;
+  color: #c586c0;
+}
+
+.dark .dpo-code-focus-text :deep(.py-operator) {
+  color: #d4d4d4;
 }
 
 @media (max-width: 640px) {
