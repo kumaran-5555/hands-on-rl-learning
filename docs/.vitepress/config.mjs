@@ -1226,7 +1226,7 @@ export default defineConfig({
       }
     },
     themeConfig: {
-      logo: '/logo.svg',
+      logo: '/readme/logo.png',
       siteTitle: 'Hands-on Modern RL',
       nav: zhNav,
       sidebar: zhSidebar,

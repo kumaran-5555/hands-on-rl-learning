@@ -1,4 +1,5 @@
 <div align="center">
+  <img src="docs/public/readme/logo.png" alt="Hands-On Modern RL Logo" width="500" />
   <h1>Hands-On Modern RL</h1>
   <p><strong>A hands-on modern reinforcement learning course</strong></p>
   <p><em>A practice-first guide to modern RL, from classic control to LLM post-training, RLVR, and multimodal agents.</em></p>
