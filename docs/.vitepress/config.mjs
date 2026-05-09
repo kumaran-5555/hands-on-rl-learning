@@ -642,11 +642,11 @@ const zhSidebar = {
               link: '/chapter04_dqn/dqn-components'
             },
             {
-              text: '4.3 训练过程',
+              text: '4.3 LunarLander 训练分析',
               link: '/chapter04_dqn/training-analysis'
             },
             {
-              text: '4.4 LunarLander',
+              text: '4.4 LunarLander 实战',
               link: '/chapter04_dqn/lunar-lander'
             },
             {

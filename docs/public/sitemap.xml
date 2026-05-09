@@ -385,50 +385,44 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://walkinglabs.github.io/hands-on-modern-rl/chapter04_dqn/cartpole-dqn/</loc>
-    <lastmod>2026-05-09T07:42:36.761Z</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://walkinglabs.github.io/hands-on-modern-rl/chapter04_dqn/dqn-components/</loc>
-    <lastmod>2026-05-09T07:44:59.906Z</lastmod>
+    <lastmod>2026-05-09T15:01:05.943Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://walkinglabs.github.io/hands-on-modern-rl/chapter04_dqn/dqn-family/</loc>
-    <lastmod>2026-05-08T09:23:44.258Z</lastmod>
+    <lastmod>2026-05-09T15:02:40.978Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://walkinglabs.github.io/hands-on-modern-rl/chapter04_dqn/from-q-to-dqn/</loc>
-    <lastmod>2026-05-09T09:03:55.148Z</lastmod>
+    <lastmod>2026-05-09T15:02:31.881Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://walkinglabs.github.io/hands-on-modern-rl/chapter04_dqn/intro/</loc>
-    <lastmod>2026-05-09T14:44:53.267Z</lastmod>
+    <lastmod>2026-05-09T15:06:21.080Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://walkinglabs.github.io/hands-on-modern-rl/chapter04_dqn/lunar-lander/</loc>
-    <lastmod>2026-05-09T14:46:59.207Z</lastmod>
+    <lastmod>2026-05-09T15:07:16.971Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://walkinglabs.github.io/hands-on-modern-rl/chapter04_dqn/training-analysis/</loc>
-    <lastmod>2026-05-09T07:42:25.530Z</lastmod>
+    <lastmod>2026-05-09T15:01:50.350Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://walkinglabs.github.io/hands-on-modern-rl/chapter04_dqn/visual-game-projects/</loc>
-    <lastmod>2026-05-08T09:23:44.296Z</lastmod>
+    <lastmod>2026-05-09T15:07:46.133Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
