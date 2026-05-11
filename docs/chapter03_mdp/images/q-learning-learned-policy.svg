@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="360" viewBox="0 0 360 360">
+  <g font-family="Arial, 'Noto Sans SC', sans-serif">
+    <!-- Grid border -->
+    <rect x="0" y="0" width="360" height="360" fill="none" stroke="#334155" stroke-width="2"/>
+
+    <!-- Grid lines -->
+    <g stroke="#94a3b8" stroke-width="1">
+      <line x1="90" y1="0" x2="90" y2="360"/>
+      <line x1="180" y1="0" x2="180" y2="360"/>
+      <line x1="270" y1="0" x2="270" y2="360"/>
+      <line x1="0" y1="90" x2="360" y2="90"/>
+      <line x1="0" y1="180" x2="360" y2="180"/>
+      <line x1="0" y1="270" x2="360" y2="270"/>
+    </g>
+
+    <!-- Arrows: each cell center at (col*90+45, row*90+45) -->
+    <!-- Arrow path: → = right, ↓ = down -->
+
+    <!-- Row 0: → ↓ → ↓ -->
+    <!-- (0,0) → right -->
+    <line x1="30" y1="45" x2="60" y2="45" stroke="#334155" stroke-width="3" stroke-linecap="round"/>
+    <polyline points="55,38 63,45 55,52" fill="none" stroke="#334155" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- (0,1) ↓ down -->
+    <line x1="135" y1="25" x2="135" y2="65" stroke="#334155" stroke-width="3" stroke-linecap="round"/>
+    <polyline points="128,59 135,67 142,59" fill="none" stroke="#334155" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- (0,2) → right -->
+    <line x1="210" y1="45" x2="240" y2="45" stroke="#334155" stroke-width="3" stroke-linecap="round"/>
+    <polyline points="235,38 243,45 235,52" fill="none" stroke="#334155" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- (0,3) ↓ down -->
+    <line x1="315" y1="25" x2="315" y2="65" stroke="#334155" stroke-width="3" stroke-linecap="round"/>
+    <polyline points="308,59 315,67 322,59" fill="none" stroke="#334155" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- Row 1: ↓ → → ↓ -->
+    <!-- (1,0) ↓ down -->
+    <line x1="45" y1="115" x2="45" y2="155" stroke="#334155" stroke-width="3" stroke-linecap="round"/>
+    <polyline points="38,149 45,157 52,149" fill="none" stroke="#334155" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- (1,1) → right -->
+    <line x1="120" y1="135" x2="150" y2="135" stroke="#334155" stroke-width="3" stroke-linecap="round"/>
+    <polyline points="145,128 153,135 145,142" fill="none" stroke="#334155" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- (1,2) → right -->
+    <line x1="210" y1="135" x2="240" y2="135" stroke="#334155" stroke-width="3" stroke-linecap="round"/>
+    <polyline points="235,128 243,135 235,142" fill="none" stroke="#334155" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- (1,3) ↓ down -->
+    <line x1="315" y1="115" x2="315" y2="155" stroke="#334155" stroke-width="3" stroke-linecap="round"/>
+    <polyline points="308,149 315,157 322,149" fill="none" stroke="#334155" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- Row 2: → → → ↓ -->
+    <!-- (2,0) → right -->
+    <line x1="30" y1="225" x2="60" y2="225" stroke="#334155" stroke-width="3" stroke-linecap="round"/>
+    <polyline points="55,218 63,225 55,232" fill="none" stroke="#334155" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- (2,1) → right -->
+    <line x1="120" y1="225" x2="150" y2="225" stroke="#334155" stroke-width="3" stroke-linecap="round"/>
+    <polyline points="145,218 153,225 145,232" fill="none" stroke="#334155" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- (2,2) → right -->
+    <line x1="210" y1="225" x2="240" y2="225" stroke="#334155" stroke-width="3" stroke-linecap="round"/>
+    <polyline points="235,218 243,225 235,232" fill="none" stroke="#334155" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- (2,3) ↓ down -->
+    <line x1="315" y1="205" x2="315" y2="245" stroke="#334155" stroke-width="3" stroke-linecap="round"/>
+    <polyline points="308,239 315,247 322,239" fill="none" stroke="#334155" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- Row 3: → → → G -->
+    <!-- (3,0) → right -->
+    <line x1="30" y1="315" x2="60" y2="315" stroke="#334155" stroke-width="3" stroke-linecap="round"/>
+    <polyline points="55,308 63,315 55,322" fill="none" stroke="#334155" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- (3,1) → right -->
+    <line x1="120" y1="315" x2="150" y2="315" stroke="#334155" stroke-width="3" stroke-linecap="round"/>
+    <polyline points="145,308 153,315 145,322" fill="none" stroke="#334155" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- (3,2) → right -->
+    <line x1="210" y1="315" x2="240" y2="315" stroke="#334155" stroke-width="3" stroke-linecap="round"/>
+    <polyline points="235,308 243,315 235,322" fill="none" stroke="#334155" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- Goal cell (3,3) -->
+    <rect x="270" y="270" width="90" height="90" fill="#dcfce7" stroke="#334155" stroke-width="2"/>
+    <text x="315" y="322" text-anchor="middle" font-size="24" font-weight="700" fill="#166534">G</text>
+
+    <!-- Cell coordinates (dimmed) -->
+    <g fill="#cbd5e1" font-size="9" text-anchor="middle">
+      <text x="45" y="80">(0,0)</text>
+      <text x="135" y="80">(0,1)</text>
+      <text x="225" y="80">(0,2)</text>
+      <text x="315" y="80">(0,3)</text>
+      <text x="45" y="170">(1,0)</text>
+      <text x="135" y="170">(1,1)</text>
+      <text x="225" y="170">(1,2)</text>
+      <text x="315" y="170">(1,3)</text>
+      <text x="45" y="260">(2,0)</text>
+      <text x="135" y="260">(2,1)</text>
+      <text x="225" y="260">(2,2)</text>
+      <text x="315" y="260">(2,3)</text>
+      <text x="45" y="350">(3,0)</text>
+      <text x="135" y="350">(3,1)</text>
+      <text x="225" y="350">(3,2)</text>
+    </g>
+  </g>
+</svg>
