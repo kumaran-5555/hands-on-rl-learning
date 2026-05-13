@@ -10,10 +10,12 @@
 
 ## AlphaStar：用 Actor-Critic 打败星际争霸 Grandmaster
 
-<img src="./images/sc2-gameplay.gif" alt="星际争霸 II 游戏画面" width="400" loading="eager" decoding="async">
+**星际争霸 II**（StarCraft II）是暴雪娱乐于 2010 年发行的**实时策略游戏**（RTS）。游戏中两名玩家各自选择一个种族——**Terran**（人类）、**Protoss**（星灵）或 **Zerg**（异虫），在一张地图上同时采集资源（矿物和瓦斯）、建造建筑、生产军队、升级科技，最终目标是消灭对手。与回合制棋类游戏不同，星际争霸是**实时**进行的：双方同时操作，没有"等对方走完再走"的回合，每秒钟需要做出多个决策——选兵、移动、进攻、撤退、建造、侦察，职业选手的**有效 APM**（每分钟操作数）可达 300-500。
+
+<img src="./images/sc2-gameplay.gif" alt="星际争霸 II 游戏画面" width="500" loading="eager" decoding="async">
 
 <div style="text-align: center; font-size: 0.9em; color: var(--vp-c-text-2); margin-top: -10px; margin-bottom: 20px;">
-  <em>星际争霸 II（StarCraft II）游戏画面。玩家需要实时控制数百个单位、管理资源、规划战略，一局游戏持续约 10,000 步操作。</em>
+  <em>星际争霸 II 游戏对战画面。屏幕中央为战场主视图，左下角为小地图（全局态势），右下角为资源和单位信息面板。</em>
 </div>
 
 ### 为什么星际争霸比围棋更难

@@ -91,10 +91,10 @@ $$\max_\theta \; \mathbb{E}_{x \sim \mathcal{D}, y \sim \pi_\theta(\cdot|x)} \le
 
 其中 KL 散度惩罚项 $\beta \, \text{KL}(\pi_\theta \| \pi_{\text{ref}})$ 确保模型不会为了追求高分而偏离原始行为太远——这是 RLHF 中防止"奖励投机"（Reward Hacking）的关键约束。
 
-![AlphaGo vs Lee Sedol](./images/alphago-game5.svg)
+![ChatGPT 早期界面示例](./images/chatgpt.png)
 
 <div style="text-align: center; font-size: 0.9em; color: var(--vp-c-text-2); margin-top: -10px; margin-bottom: 20px;">
-  <em>图 5：2016 年 AlphaGo 与李世石五番棋第五局棋谱。AlphaGo 以 4:1 获胜，标志着强化学习第一次震撼公众。来源：<a href="https://commons.wikimedia.org/wiki/File:Lee_Sedol_(B)_vs_AlphaGo_(W)_-_Game_5.svg" target="_blank" rel="noopener noreferrer">Wikimedia Commons</a>（CC BY-SA 4.0）</em>
+  <em>图 5：ChatGPT 早期界面示例。2022 年 ChatGPT 的发布让 RLHF 从大模型后训练论文走向真实产品，也标志着强化学习开始进入大模型对齐与推理阶段。来源：OpenAI <a href="https://openai.com/index/chatgpt/" target="_blank" rel="noopener noreferrer">Introducing ChatGPT</a></em>
 </div>
 
 - **2023 年**，斯坦福大学等提出了 **DPO（直接偏好优化）** [^10]。研究者们发现，可以绕过繁琐的奖励模型训练，直接用一个简单的分类损失函数在人类偏好数据上微调语言模型。DPO 的损失函数直接从 RLHF 的目标中推导而来：

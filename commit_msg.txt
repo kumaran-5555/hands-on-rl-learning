@@ -1,0 +1,16 @@
+docs: refine image assets and captions across chapters
+
+This commit focuses on improving the visual presentation, accuracy, and attribution of images in several chapters.
+
+### Chapter 10: Agentic RL
+- Added explicit image captions with proper attribution/sources for all major architectural and performance figures (Tongyi DeepResearch, DeepResearcher, Search-R1).
+- Replaced `.png` format images with optimized `.webp` versions for `searchr1_arch` and `searchr1_multiturn` to improve page loading speed.
+- Included original `.png` backups as untracked files for reference (`searchr1_arch_orig.png`).
+
+### Chapter 6: Actor-Critic
+- Expanded the introductory text for StarCraft II in `ac-frontier.md` to provide better context on game mechanics and APM requirements.
+- Increased the display width of the `sc2-gameplay.gif` to 500px and updated its caption for better clarity.
+
+### Preface: Brief History
+- Replaced the AlphaGo game 5 SVG with a ChatGPT interface image (`chatgpt.png`) in the 2022 RLHF timeline section.
+- Updated the corresponding caption to highlight ChatGPT's role in bringing RLHF from academic papers to mainstream products, which aligns better with the narrative of modern LLM alignment.
