@@ -529,17 +529,14 @@ const zhNav = [
 ]
 
 const enNav = [
-  { text: 'Start', link: '/en/guide/getting-started' },
+  { text: 'Preface', link: '/en/preface/intro' },
+  { text: 'Fundamentals', link: '/en/chapter01_cartpole/intro' },
+  { text: 'Core Theory', link: '/en/chapter03_mdp/intro' },
+  { text: 'LLM RL', link: '/en/chapter08_rlhf/intro' },
   {
-    text: 'Demo Course',
-    items: [
-      { text: 'Course Tour', link: '/en/demo/' },
-      { text: '01 Positioning and Map', link: '/en/demo/chapter-01/' },
-      { text: '02 Content and Practice', link: '/en/demo/chapter-02/' },
-      { text: '03 Release and Delivery', link: '/en/demo/chapter-03/' }
-    ]
-  },
-  { text: 'Deployment', link: '/en/deployment/' }
+    text: 'Frontier Topics',
+    link: '/en/chapter11_vlm_rl/intro'
+  }
 ]
 
 const zhSidebar = {
@@ -778,7 +775,7 @@ const zhSidebar = {
             {
               text: '8.6 评估与奖励黑客',
               link: '/chapter08_rlhf/evaluation'
-            },
+            }
           ]
         },
         {
@@ -1120,73 +1117,580 @@ const zhSidebar = {
 }
 
 const enSidebar = {
-  '/en/guide/': [
-    {
-      text: 'Template Guide',
-      items: [
-        { text: 'Getting Started', link: '/en/guide/getting-started' },
-        { text: 'Course Structure', link: '/en/guide/course-structure' },
-        { text: 'Project Setup Checklist', link: '/en/guide/project-setup' },
-        { text: 'Deployment Guide', link: '/en/deployment/' }
-      ]
-    }
-  ],
-  '/en/demo/': [
-    {
-      text: 'Demo Course Tour',
-      items: [
-        { text: 'Overview', link: '/en/demo/' },
-        { text: 'Learning Path', link: '/en/demo/#learning-path' },
-        { text: 'Deliverables', link: '/en/demo/#stage-deliverables' }
-      ]
-    },
-    {
-      text: 'Part I. Shape the Course',
-      collapsed: false,
-      items: [
-        {
-          text: 'Chapter 01 Positioning and Map',
-          link: '/en/demo/chapter-01/'
-        },
-        {
-          text: 'Chapter 01 Advanced Notes',
-          link: '/en/demo/chapter-01/advanced'
-        }
-      ]
-    },
-    {
-      text: 'Part II. Write Content and Practice',
-      collapsed: false,
-      items: [
-        {
-          text: 'Chapter 02 Content and Practice',
-          link: '/en/demo/chapter-02/'
-        },
-        {
-          text: 'Chapter 02 Homework Brief',
-          link: '/en/demo/chapter-02/homework/'
-        }
-      ]
-    },
-    {
-      text: 'Part III. Release and Delivery',
-      collapsed: false,
-      items: [
-        {
-          text: 'Chapter 03 Release and Delivery',
-          link: '/en/demo/chapter-03/'
-        }
-      ]
-    }
-  ],
   '/en/': [
     {
-      text: 'Start Here',
+      text: 'Preface',
       items: [
-        { text: 'Home', link: '/en/' },
-        { text: 'Getting Started', link: '/en/guide/getting-started' },
-        { text: 'Demo Course', link: '/en/demo/' },
-        { text: 'Deployment', link: '/en/deployment/' }
+        { text: 'Course Overview', link: '/en/preface/intro' },
+        { text: 'A Brief History of RL', link: '/en/preface/brief-history' },
+        { text: 'Environment Setup', link: '/en/preface/env-setup' }
+      ]
+    },
+    {
+      text: 'Fundamentals',
+      items: [
+        {
+          text: '1. CartPole Balancing',
+          link: '/en/chapter01_cartpole/intro',
+          collapsed: false,
+          items: [
+            {
+              text: '1.1 Core Concepts',
+              link: '/en/chapter01_cartpole/principles'
+            },
+            {
+              text: '1.2 Training Metrics',
+              link: '/en/chapter01_cartpole/metrics'
+            }
+          ]
+        },
+        {
+          text: '2. DPO Preference Tuning',
+          link: '/en/chapter02_dpo/intro',
+          collapsed: false,
+          items: [
+            {
+              text: '2.1 DPO Derivation',
+              link: '/en/chapter02_dpo/principles'
+            },
+            { text: '2.2 Training Metrics', link: '/en/chapter02_dpo/metrics' }
+          ]
+        },
+        { text: 'Part I Summary', link: '/en/summaries/part1-summary' }
+      ]
+    },
+    {
+      text: 'Core Theory and Methods',
+      items: [
+        {
+          text: '3. MDP and Value Functions',
+          link: '/en/chapter03_mdp/intro',
+          collapsed: false,
+          items: [
+            {
+              text: '3.1 The Two-Armed Bandit',
+              link: '/en/chapter03_mdp/bandit'
+            },
+            {
+              text: '3.2 Markov Decision Processes',
+              link: '/en/chapter03_mdp/mdp'
+            },
+            {
+              text: '3.3 Value Functions & Bellman',
+              link: '/en/chapter03_mdp/value-bellman'
+            },
+            { text: '3.4 DP, MC, and TD', link: '/en/chapter03_mdp/dp-mc-td' },
+            {
+              text: '3.5 From V to Q-Learning',
+              link: '/en/chapter03_mdp/value-q'
+            },
+            {
+              text: '3.6 From Value to Policy',
+              link: '/en/chapter03_mdp/policy-objective'
+            },
+            {
+              text: '3.7 Where Does Data Come From',
+              link: '/en/chapter03_mdp/algorithm-taxonomy'
+            },
+            {
+              text: '3.8 Reward Function Design',
+              link: '/en/chapter03_mdp/reward-design'
+            },
+            { text: '3.9 Chapter Summary', link: '/en/chapter03_mdp/panorama' }
+          ]
+        },
+        {
+          text: '4. Deep Q-Networks',
+          link: '/en/chapter04_dqn/intro',
+          collapsed: false,
+          items: [
+            {
+              text: '4.1 Why DQN Is Needed',
+              link: '/en/chapter04_dqn/from-q-to-dqn'
+            },
+            {
+              text: '4.2 DQN Architecture',
+              link: '/en/chapter04_dqn/dqn-components'
+            },
+            {
+              text: '4.3 Hands-On: LunarLander',
+              link: '/en/chapter04_dqn/lunar-lander'
+            },
+            {
+              text: '4.4 DQN Improvement Family',
+              link: '/en/chapter04_dqn/dqn-family'
+            },
+            {
+              text: '4.5 Hands-On: Visual Games',
+              link: '/en/chapter04_dqn/visual-game-projects'
+            }
+          ]
+        },
+        {
+          text: '5. Policy-Based Methods',
+          link: '/en/chapter05_policy_gradient/intro',
+          collapsed: false,
+          items: [
+            {
+              text: '5.1 Why Policy Gradients',
+              link: '/en/chapter05_policy_gradient/pg-necessity'
+            },
+            {
+              text: '5.2 Policy Gradient & REINFORCE',
+              link: '/en/chapter05_policy_gradient/reinforce'
+            },
+            {
+              text: '5.3 Hands-On: PG CartPole',
+              link: '/en/chapter05_policy_gradient/cartpole'
+            },
+            {
+              text: '5.4 Variance and Baselines',
+              link: '/en/chapter05_policy_gradient/pg-improvements'
+            },
+            {
+              text: '5.5 Hands-On: PG with Baseline',
+              link: '/en/chapter05_policy_gradient/cartpole-baseline'
+            }
+          ]
+        },
+        {
+          text: '6. Actor-Critic',
+          link: '/en/chapter06_actor_critic/intro',
+          collapsed: false,
+          items: [
+            {
+              text: '6.1 The Advantage Function',
+              link: '/en/chapter06_actor_critic/advantage-function'
+            },
+            {
+              text: '6.2 Training the Critic',
+              link: '/en/chapter06_actor_critic/critic-training'
+            },
+            {
+              text: '6.3 Actor-Critic Architecture',
+              link: '/en/chapter06_actor_critic/actor-critic'
+            },
+            {
+              text: '6.4 Hands-On: Pendulum',
+              link: '/en/chapter06_actor_critic/pendulum'
+            },
+            {
+              text: '6.5 Hands-On: BipedalWalker',
+              link: '/en/chapter06_actor_critic/bipedalwalker'
+            },
+            {
+              text: '6.6 Actor-Critic at Scale',
+              link: '/en/chapter06_actor_critic/ac-frontier'
+            }
+          ]
+        },
+        {
+          text: '7. PPO',
+          link: '/en/chapter07_ppo/intro',
+          collapsed: false,
+          items: [
+            {
+              text: '7.1 Hands-On: BipedalWalker',
+              link: '/en/chapter07_ppo/ppo-bipedal-walker'
+            },
+            { text: '7.2 PPO Derivation', link: '/en/chapter07_ppo/ppo-math' },
+            {
+              text: '7.3 Trust Region & Clipping',
+              link: '/en/chapter07_ppo/trust-region-clipping'
+            },
+            {
+              text: '7.4 GAE and Reward Models',
+              link: '/en/chapter07_ppo/gae-reward-model'
+            },
+            {
+              text: '7.5 PPO Game Benchmarks',
+              link: '/en/chapter07_ppo/ppo-game-benchmark'
+            },
+            {
+              text: '7.6 RL in Long-Horizon Tasks',
+              link: '/en/chapter07_ppo/rl-long-horizon-planning'
+            }
+          ]
+        },
+        { text: 'Part II Summary', link: '/en/summaries/part2-summary' }
+      ]
+    },
+    {
+      text: 'LLM Reinforcement Learning',
+      items: [
+        {
+          text: '8. The RLHF Pipeline',
+          link: '/en/chapter08_rlhf/intro',
+          collapsed: false,
+          items: [
+            {
+              text: '8.1 Base Model to Assistant',
+              link: '/en/chapter08_rlhf/base-model-to-assistant'
+            },
+            {
+              text: '8.2 RLHF Pipeline',
+              link: '/en/chapter08_rlhf/standard-rlhf-pipeline'
+            },
+            {
+              text: '8.3 SFT Instruction Tuning',
+              link: '/en/chapter08_rlhf/imitation-learning-pipeline'
+            },
+            {
+              text: '8.4 Reward Models',
+              link: '/en/chapter08_rlhf/reward-function-design'
+            },
+            {
+              text: '8.5 PPO-RLHF Alignment',
+              link: '/en/chapter08_rlhf/ppo-rlhf-loop'
+            },
+            {
+              text: '8.6 Evaluation & Reward Hacking',
+              link: '/en/chapter08_rlhf/evaluation'
+            }
+          ]
+        },
+        {
+          text: '9. Post-Training Alignment',
+          link: '/en/chapter09_alignment/intro',
+          collapsed: false,
+          items: [
+            {
+              text: '9.1 DPO Theory and Selection',
+              link: '/en/chapter09_alignment/dpo-theory-and-family'
+            },
+            {
+              text: '9.2 GRPO Training',
+              link: '/en/chapter09_grpo_rlvr/grpo-practice-and-mechanism'
+            },
+            {
+              text: '9.3 The R1-Zero Paradigm',
+              link: '/en/chapter09_grpo_rlvr/deepseek-dapo'
+            },
+            {
+              text: '9.4 RLVR: Verifiable Rewards',
+              link: '/en/chapter09_grpo_rlvr/rlvr'
+            },
+            {
+              text: '9.5 On-Policy Distillation',
+              link: '/en/chapter09_grpo_rlvr/on-policy-distillation'
+            },
+            {
+              text: '9.6 Industrial Post-Training',
+              link: '/en/chapter09_alignment/industrial-post-training'
+            }
+          ]
+        },
+        {
+          text: '10. Agentic RL',
+          link: '/en/chapter10_agentic_rl/intro',
+          collapsed: false,
+          items: [
+            {
+              text: '10.1 Multi-Turn Interaction',
+              link: '/en/chapter10_agentic_rl/multi-turn-rl'
+            },
+            {
+              text: '10.2 Tool Use',
+              link: '/en/chapter10_agentic_rl/tool-use-and-trajectory'
+            },
+            {
+              text: '10.3 Benchmarks & Cases',
+              link: '/en/chapter10_agentic_rl/industrial-evaluation'
+            },
+            {
+              text: '10.4 Hands-On: Agent Data',
+              link: '/en/chapter10_agentic_rl/agent-data-swe-smith'
+            },
+            {
+              text: '10.5 Hands-On: DeepCoder',
+              link: '/en/chapter10_agentic_rl/rllm-deepcoder-lab'
+            },
+            {
+              text: '10.6 Hands-On: FinQA Agent',
+              link: '/en/chapter10_agentic_rl/rllm-finqa-lab'
+            },
+            {
+              text: '10.7 Deep Research',
+              link: '/en/chapter10_agentic_rl/deep-research-agent'
+            },
+            {
+              text: '10.8 Agentic Training Systems',
+              link: '/en/chapter10_agentic_rl/build-agentic-training-system'
+            },
+            {
+              text: '10.9 Extended Readings',
+              link: '/en/chapter10_agentic_rl/extended-readings'
+            }
+          ]
+        },
+        { text: 'Part III Summary', link: '/en/summaries/part3-summary' }
+      ]
+    },
+    {
+      text: 'Frontier Topics',
+      items: [
+        {
+          text: '11. VLM Reinforcement Learning',
+          link: '/en/chapter11_vlm_rl/intro',
+          collapsed: false,
+          items: [
+            {
+              text: '11.1 VLM RL Training',
+              link: '/en/chapter11_vlm_rl/vlm-grpo-hands-on'
+            },
+            {
+              text: '11.2 Visual Reward Signals',
+              link: '/en/chapter11_vlm_rl/vlm-challenges'
+            },
+            {
+              text: '11.3 VLM RL Frameworks',
+              link: '/en/chapter11_vlm_rl/vlm-frameworks'
+            },
+            {
+              text: '11.4 Visual Generation RL',
+              link: '/en/chapter11_vlm_rl/visual-generation-rl'
+            },
+            {
+              text: '11.5 Hands-On: GeoQA',
+              link: '/en/chapter11_vlm_rl/easyr1-geoqa'
+            }
+          ]
+        },
+        {
+          text: '12. Future Trends',
+          link: '/en/chapter12_future_trends/intro',
+          collapsed: false,
+          items: [
+            {
+              text: '12.1 Embodied Intelligence',
+              link: '/en/chapter12_future_trends/embodied-intelligence/'
+            },
+            {
+              text: '12.2 Model-Based RL',
+              link: '/en/chapter12_future_trends/embodied-intelligence/model-based-rl/'
+            },
+            {
+              text: '12.3 Self-Play',
+              link: '/en/chapter12_future_trends/self-play-outlook/'
+            },
+            {
+              text: '12.4 Multi-Agent RL',
+              link: '/en/chapter12_future_trends/llm-multi-agent-rl/'
+            },
+            {
+              text: '12.5 Offline RL',
+              link: '/en/chapter12_future_trends/offline-rl/'
+            },
+            {
+              text: '12.6 Scaling Trends',
+              link: '/en/chapter12_future_trends/rl-scaling-outlook'
+            }
+          ]
+        },
+        { text: 'Part IV Summary', link: '/en/summaries/part4-summary' }
+      ]
+    },
+    {
+      text: 'Appendices',
+      items: [
+        {
+          text: 'A. Training Debugging Guide',
+          link: '/en/appendix_common_pitfalls/intro'
+        },
+        {
+          text: 'B. RL Engineering Practice',
+          link: '/en/appendix_industrial_training/intro',
+          collapsed: false,
+          items: [
+            {
+              text: 'B.1 Training Infrastructure',
+              link: '/en/appendix_industrial_training/rl-infrastructure'
+            },
+            {
+              text: 'B.2 Agent Sandbox',
+              link: '/en/appendix_industrial_training/agentic-rl-infra'
+            },
+            {
+              text: 'B.3 Evaluation Benchmarks',
+              link: '/en/appendix_industrial_training/evaluation-badcase'
+            },
+            {
+              text: 'B.4 Metrics Glossary',
+              link: '/en/appendix_industrial_training/metrics-glossary'
+            },
+            {
+              text: 'B.5 Industrial Exercises',
+              link: '/en/appendix_industrial_training/industrial-exercises'
+            }
+          ]
+        },
+        {
+          text: 'C. Code Cheatsheet',
+          link: '/en/appendix_code_cheatsheet/intro',
+          collapsed: false,
+          items: [
+            {
+              text: 'C.1 SFT and KL',
+              link: '/en/appendix_code_cheatsheet/sft-kl'
+            },
+            {
+              text: 'C.2 PPO and GAE',
+              link: '/en/appendix_code_cheatsheet/ppo-gae'
+            },
+            {
+              text: 'C.3 DPO Family',
+              link: '/en/appendix_code_cheatsheet/dpo-family'
+            },
+            {
+              text: 'C.4 GRPO and Reward Models',
+              link: '/en/appendix_code_cheatsheet/grpo-rlvr'
+            },
+            {
+              text: 'C.5 Softmax & Cross-Entropy',
+              link: '/en/appendix_code_cheatsheet/softmax-ce'
+            },
+            {
+              text: 'C.6 Sampling Methods',
+              link: '/en/appendix_code_cheatsheet/top-k-top-p'
+            },
+            {
+              text: 'C.7 Attention Mechanism',
+              link: '/en/appendix_code_cheatsheet/attention-mha'
+            },
+            { text: 'C.8 DAPO', link: '/en/appendix_code_cheatsheet/dapo' }
+          ]
+        },
+        {
+          text: 'D. Learning Resources',
+          link: '/en/appendix_game_projects/intro'
+        },
+        {
+          text: 'E. Math Foundations for RL',
+          link: '/en/appendix_math/intro',
+          collapsed: false,
+          items: [
+            {
+              text: 'E.1 Linear Algebra',
+              link: '/en/appendix_math/linear-algebra',
+              collapsed: true,
+              items: [
+                {
+                  text: 'Basic Objects',
+                  link: '/en/appendix_math/linear-algebra-basics'
+                },
+                {
+                  text: 'Bellman Matrix',
+                  link: '/en/appendix_math/linear-algebra-bellman'
+                },
+                {
+                  text: 'Function Approximation',
+                  link: '/en/appendix_math/linear-algebra-function-approx'
+                },
+                {
+                  text: 'Convergence & Trust Regions',
+                  link: '/en/appendix_math/linear-algebra-advanced'
+                },
+                {
+                  text: 'Formulas & Exercises',
+                  link: '/en/appendix_math/linear-algebra-formulas-exercises'
+                }
+              ]
+            },
+            {
+              text: 'E.2 Probability & Estimation',
+              link: '/en/appendix_math/probability-statistics',
+              collapsed: true,
+              items: [
+                {
+                  text: 'Probability Basics',
+                  link: '/en/appendix_math/probability-basics'
+                },
+                {
+                  text: 'Returns and Value',
+                  link: '/en/appendix_math/probability-value'
+                },
+                {
+                  text: 'Sampling & Estimation',
+                  link: '/en/appendix_math/probability-sampling'
+                },
+                {
+                  text: 'Trajectories and GAE',
+                  link: '/en/appendix_math/probability-trajectory-td'
+                },
+                {
+                  text: 'Bellman Expectations',
+                  link: '/en/appendix_math/probability-bellman-advanced'
+                },
+                {
+                  text: 'Formulas & Exercises',
+                  link: '/en/appendix_math/probability-formulas-exercises'
+                }
+              ]
+            },
+            {
+              text: 'E.3 Calculus & Optimization',
+              link: '/en/appendix_math/calculus-optimization',
+              collapsed: true,
+              items: [
+                {
+                  text: 'Derivatives & Gradients',
+                  link: '/en/appendix_math/calculus-basics'
+                },
+                {
+                  text: 'Policy Gradient',
+                  link: '/en/appendix_math/calculus-policy-gradient'
+                },
+                {
+                  text: 'PPO and Adam',
+                  link: '/en/appendix_math/calculus-ppo'
+                },
+                {
+                  text: 'Derivation Tools',
+                  link: '/en/appendix_math/calculus-derivations'
+                },
+                {
+                  text: 'Complete Formulas',
+                  link: '/en/appendix_math/calculus-advanced-formulas'
+                },
+                {
+                  text: 'Formulas & Exercises',
+                  link: '/en/appendix_math/calculus-formulas-exercises'
+                }
+              ]
+            },
+            {
+              text: 'E.4 Information Theory',
+              link: '/en/appendix_math/information-theory',
+              collapsed: true,
+              items: [
+                {
+                  text: 'Entropy & Exploration',
+                  link: '/en/appendix_math/information-basics'
+                },
+                {
+                  text: 'Cross-Entropy & KL',
+                  link: '/en/appendix_math/information-cross-entropy-kl'
+                },
+                {
+                  text: 'RLHF and DPO',
+                  link: '/en/appendix_math/information-rlhf-dpo'
+                },
+                {
+                  text: 'Mutual Information',
+                  link: '/en/appendix_math/information-mutual-info'
+                },
+                {
+                  text: 'Complete Formulas',
+                  link: '/en/appendix_math/information-advanced-formulas'
+                },
+                {
+                  text: 'Formulas & Exercises',
+                  link: '/en/appendix_math/information-formulas-exercises'
+                }
+              ]
+            }
+          ]
+        }
       ]
     }
   ]

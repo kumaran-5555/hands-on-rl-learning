@@ -1,0 +1,9 @@
+---
+title: B.7 Monitoring
+---
+
+# B.7 Monitoring
+
+> This page is a placeholder. The English translation is not yet available.
+
+For the Chinese version, see the corresponding page in the [Chinese edition](/zh/).
