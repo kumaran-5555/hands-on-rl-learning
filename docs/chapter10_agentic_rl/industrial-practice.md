@@ -303,4 +303,4 @@ MoE 模型在 RL 训练中不仅面临上述路由一致性问题，还存在专
 
 ---
 
-本节梳理了 Agentic RL 训练中的常见工程问题及工业界的解决方案。下一节将介绍 Agentic 评测体系——[Agentic 评测体系与 Benchmark 全景](./evaluation-benchmarks)，看看怎么评估 Agent 的好坏。
+本节梳理了 Agentic RL 训练中的常见工程问题及工业界的解决方案。下一节将进入 [10.3 节：工业实践、评测与 Badcase](./industrial-evaluation)，看看怎么用 benchmark、评测管线和 badcase 归因判断 Agent 到底有没有变好。

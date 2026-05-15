@@ -804,15 +804,19 @@ const zhSidebar = {
               link: '/chapter09_grpo_rlvr/rlvr'
             },
             {
-              text: '9.5 OPD 在线蒸馏',
+              text: '9.5 动手：金融 API 工具调用 GRPO',
+              link: '/chapter09_grpo_rlvr/financial-tool-calling-grpo'
+            },
+            {
+              text: '9.6 OPD 在线蒸馏',
               link: '/chapter09_grpo_rlvr/on-policy-distillation'
             },
             {
-              text: '9.6 动手：用 veRL 做代码生成强化学习',
+              text: '9.7 动手：用 veRL 做代码生成强化学习',
               link: '/chapter09_grpo_rlvr/verl-code-sandbox'
             },
             {
-              text: '9.7 后训练工业实践',
+              text: '9.8 后训练工业实践',
               link: '/chapter09_alignment/industrial-post-training'
             }
           ]
@@ -1387,10 +1391,6 @@ const enSidebar = {
               link: '/en/chapter09_grpo_rlvr/on-policy-distillation'
             },
             {
-              text: '9.6 Hands-on: Code Generation RL with veRL',
-              link: '/en/chapter09_grpo_rlvr/verl-code-sandbox'
-            },
-            {
               text: '9.7 Industrial Post-Training',
               link: '/en/chapter09_alignment/industrial-post-training'
             }
@@ -1483,7 +1483,7 @@ const enSidebar = {
             },
             {
               text: '12.2 Model-Based RL',
-              link: '/en/chapter12_future_trends/embodied-intelligence/model-based-rl/'
+              link: '/en/chapter12_future_trends/embodied-intelligence/model-based-rl'
             },
             {
               text: '12.3 Self-Play',

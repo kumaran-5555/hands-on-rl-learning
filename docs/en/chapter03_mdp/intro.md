@@ -49,17 +49,17 @@ This chapter serves as the **theoretical foundation** for the entire book. Chapt
 
 ## Section Outline
 
-| Section | Core Content |
-| --- | --- |
-| [Two-Armed Bandit](./bandit) | Understand exploration, exploitation, and expected return from the smallest decision problem |
-| [Markov Decision Process](./mdp) | Define the MDP tuple, discounted return, and policy |
-| [Value Functions and the Bellman Equation](./value-bellman) | Introduce the state value function and derive its recursive structure |
-| [DP, MC, and TD](./dp-mc-td) | Compare three value estimation methods by assumptions, data requirements, and update rules |
-| [From Q to Q-Learning](./value-q) | Use GridWorld to illustrate action value, TD targets, exploration, and tabular boundaries |
-| [From Value to Policy](./policy-objective) | Define the objective function from the perspective of directly optimizing the policy |
-| [Where Does Data Come From](./algorithm-taxonomy) | Discuss On-policy vs. Off-policy, Online vs. Offline |
-| [Reward Function Design](./reward-design) | Discuss how rewards express task objectives and the problems that incorrect rewards can cause |
-| [Chapter Summary](./panorama) | Summarize core formulas, algorithmic routes, and connections to subsequent chapters |
+| Section                                                     | Core Content                                                                                  |
+| ----------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| [Two-Armed Bandit](./bandit)                                | Understand exploration, exploitation, and expected return from the smallest decision problem  |
+| [Markov Decision Process](./mdp)                            | Define the MDP tuple, discounted return, and policy                                           |
+| [Value Functions and the Bellman Equation](./value-bellman) | Introduce the state value function and derive its recursive structure                         |
+| [DP, MC, and TD](./dp-mc-td)                                | Compare three value estimation methods by assumptions, data requirements, and update rules    |
+| [From Q to Q-Learning](./value-q)                           | Use GridWorld to illustrate action value, TD targets, exploration, and tabular boundaries     |
+| [From Value to Policy](./policy-objective)                  | Define the objective function from the perspective of directly optimizing the policy          |
+| [Where Does Data Come From](./algorithm-taxonomy)           | Discuss On-policy vs. Off-policy, Online vs. Offline                                          |
+| [Reward Function Design](./reward-design)                   | Discuss how rewards express task objectives and the problems that incorrect rewards can cause |
+| [Chapter Summary](./panorama)                               | Summarize core formulas, algorithmic routes, and connections to subsequent chapters           |
 
 ## Learning Objectives
 

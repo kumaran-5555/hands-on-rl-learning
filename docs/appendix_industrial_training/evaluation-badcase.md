@@ -56,6 +56,8 @@ flowchart LR
 | 软件工程 Agent | SWE-bench              | [官网](https://www.swebench.com/), [GitHub](https://github.com/SWE-bench/SWE-bench)                                                                 | resolved rate, pass@1                     | 真实 GitHub issue 修复与仓库级测试[^swebench]             |
 | Web Agent      | WebArena               | [官网](https://webarena.dev/), [GitHub](https://github.com/web-arena-x/webarena)                                                                    | task success                              | 浏览器操作、表单、购物、GitLab 等真实网页任务[^webarena]  |
 | 通用 Agent     | GAIA                   | [HF 数据集](https://huggingface.co/datasets/gaia-benchmark/GAIA), [排行榜](https://huggingface.co/spaces/gaia-benchmark/leaderboard)                | final answer accuracy                     | 搜索、文件、多模态、推理组合能力[^gaia]                   |
+| 工作流 Agent   | Claw-Eval-Live         | [项目页](https://claw-eval-live.github.io/), [论文](https://arxiv.org/abs/2604.28139)                                                               | pass rate, completion score               | 随市场需求季度刷新的企业工作流任务[^clawevallive]         |
+| 经济型 Agent   | ClawWork               | [GitHub](https://github.com/HKUDS/ClawWork), [项目页](https://hkuds.github.io/ClawWork/)                                                            | net income, survival, task quality        | 让 agent 在成本约束下完成职业任务并赚取收益[^clawwork]    |
 | 桌面 Agent     | OSWorld                | [官网](https://os-world.github.io/)                                                                                                                 | task success                              | 真实桌面应用和操作系统任务[^osworld]                      |
 | 用户交互 Agent | tau-bench / tau2-bench | [官网](https://www.taubench.com/), [GitHub](https://github.com/sierra-research/tau2-bench)                                                          | pass^k, database state                    | 客服、订票、零售等多轮工具-用户交互[^taubench]            |
 | 多环境 Agent   | AgentBench             | [GitHub](https://github.com/THUDM/AgentBench)                                                                                                       | environment success rate                  | Web、数据库、命令行、游戏等多环境 agent 能力[^agentbench] |
@@ -111,6 +113,19 @@ split:
 
 如果任务有确定答案，优先用规则、单元测试或 verifier。只有开放式对话、写作、偏好评估这类任务才用 LLM-as-Judge，并且要做顺序随机化、少量人工抽检和 judge 漂移监控。MT-Bench 与 Chatbot Arena 的经验说明，LLM judge 很有用，但它本身也会带来位置偏差、长度偏差和模型偏好[^mtbench]。
 
+### 评分器与工具链
+
+评测协议定下来以后，下一步不是立刻找一个“最强 judge”，而是先判断任务需要哪种证据。规则、测试和环境状态检查能回答“是否完成”；LLM-as-Judge 能回答“质量是否像人类想要的那样好”；轨迹评测工具能回答“agent 是怎样完成，或者在哪里失败的”。这些名字经常出现在论文和工程项目里，可以按下面四类理解。
+
+| 名称       | 类型                      | 解决的问题                                                                                                                             | 在项目里的位置                           |
+| ---------- | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
+| G-Eval     | LLM-as-Judge 方法         | 用强模型按 rubric 和评估步骤给开放式输出打分，比 BLEU/ROUGE 更适合摘要、对话、写作等主观任务[^geval]                                   | 偏好评估、开放式回答质量评分             |
+| MAJ-EVAL   | Multi-Agent-as-Judge 方法 | 让多个评审 persona 从不同维度讨论和评分，减少单一 judge 的视角偏差[^majeval]                                                           | 高风险开放式评测、论文/报告/复杂任务评分 |
+| DeepEval   | LLM 应用评测框架          | 像写测试一样组织 eval，内置 G-Eval、RAG、agent task completion、tool correctness 等指标[^deepeval]                                     | 本地回归测试、CI 中的轻量评测            |
+| agentevals | Agent 轨迹评测工具        | 对工具调用轨迹做 reference matching、LLM judge 或 trace 级评分；LangChain 版偏轨迹匹配，OpenTelemetry 版偏生产 trace 评估[^agentevals] | Agent 回归测试、badcase 定位             |
+
+这里有一个容易混淆的点：**G-Eval 和 MAJ-EVAL 是评分方法，DeepEval 和 agentevals 是工程工具**。前者回答“怎么判断质量”，后者回答“怎么把判断接进项目”。在 RL 后训练里，二者都不能替代 verifier；如果数学、代码、数据库状态能被确定性验证，就应优先用确定性验证。LLM judge 更适合补足语义质量、用户体验、解释完整性这类难以写成规则的维度。
+
 ### 采样次数
 
 RL 后训练常见的误判来自 `pass@k`。一个模型 `pass@8` 提升，可能只是更会“多试几次”，并不代表 `pass@1` 变强。报告里至少分开写：
@@ -142,15 +157,17 @@ Agentic RL 的评测对象不是一段答案，而是一条**轨迹**：
 
 ### Benchmark 地图
 
-| 场景              | 代表 benchmark                | 主要测什么                         | 评分方式                                    |
-| ----------------- | ----------------------------- | ---------------------------------- | ------------------------------------------- |
-| API / 函数调用    | API-Bank, BFCL 类评测         | 参数选择、调用顺序、工具返回处理   | JSON / API 调用精确匹配或执行结果[^apibank] |
-| 真实网页任务      | WebArena                      | 多站点浏览、表单、购物、信息查找   | 环境最终状态与任务答案[^webarena]           |
-| 软件工程 agent    | SWE-bench, SWE-bench Verified | 真实 GitHub issue 修复             | 仓库测试通过率[^swebench]                   |
-| 通用助手          | GAIA                          | 搜索、推理、多模态、工具组合       | 最终答案准确率[^gaia]                       |
-| 桌面/操作系统     | OSWorld                       | GUI 操作、文件、应用工作流         | 状态检查与任务完成率[^osworld]              |
-| 用户-工具多轮交互 | tau-bench                     | 对话式业务流程、规则遵循、工具使用 | 用户模拟器 + 数据库状态[^taubench]          |
-| 多环境 agent      | AgentBench                    | Web、数据库、命令行、游戏等多环境  | 各环境成功率[^agentbench]                   |
+| 场景              | 代表 benchmark                | 主要测什么                         | 评分方式                                              |
+| ----------------- | ----------------------------- | ---------------------------------- | ----------------------------------------------------- |
+| API / 函数调用    | API-Bank, BFCL 类评测         | 参数选择、调用顺序、工具返回处理   | JSON / API 调用精确匹配或执行结果[^apibank]           |
+| 真实网页任务      | WebArena                      | 多站点浏览、表单、购物、信息查找   | 环境最终状态与任务答案[^webarena]                     |
+| 软件工程 agent    | SWE-bench, SWE-bench Verified | 真实 GitHub issue 修复             | 仓库测试通过率[^swebench]                             |
+| 通用助手          | GAIA                          | 搜索、推理、多模态、工具组合       | 最终答案准确率[^gaia]                                 |
+| 动态工作流        | Claw-Eval-Live                | 企业服务、工作区修复、跨系统流程   | 固定快照任务 + 规则检查 + 结构化 judge[^clawevallive] |
+| 经济生存          | ClawWork                      | 任务质量、成本控制、长期收益       | 收入、API 成本、余额、任务质量[^clawwork]             |
+| 桌面/操作系统     | OSWorld                       | GUI 操作、文件、应用工作流         | 状态检查与任务完成率[^osworld]                        |
+| 用户-工具多轮交互 | tau-bench                     | 对话式业务流程、规则遵循、工具使用 | 用户模拟器 + 数据库状态[^taubench]                    |
+| 多环境 agent      | AgentBench                    | Web、数据库、命令行、游戏等多环境  | 各环境成功率[^agentbench]                             |
 
 选择 benchmark 时先问“我训练的 agent 会在哪里失败”。如果你训练的是代码修复 agent，SWE-bench 比 GAIA 更关键；如果你训练的是客服/订票/CRM agent，tau-bench 风格的用户模拟和数据库状态校验更接近真实业务；如果你训练的是浏览器 agent，WebArena 的环境可复现性比普通问答题更重要。
 
@@ -170,6 +187,20 @@ Agentic RL 至少需要同时看结果、过程和成本。
 | `trajectory_quality` | 计划是否合理、是否反复试错     | 诊断信号，不宜作为唯一 reward         |
 
 过程评分很诱人，但不要让它压过最终结果。一个 agent 每一步解释得很漂亮，却没有完成任务，不能算好 agent。更安全的做法是：最终状态占主权重，过程评分主要用于 badcase 归因和训练数据生成。
+
+### Rollout Cards：把分数还原成证据
+
+Agent benchmark 最容易出问题的地方，不是没有分数，而是只有分数。一个表格写着 `task_success = 62%`，却不说明失败 run 有没有被丢弃、超时怎么算、工具错误是否计入成本、同一任务多次采样如何聚合，那么这个分数就很难复现。**Rollout Cards** 提出的方向是：把 rollout 记录本身当成评测的基本单位，而不是只发布最终分数[^rolloutcards]。
+
+一张实用的 rollout card 至少应该保留：
+
+- **原始轨迹**：每一步 observation、action、tool result、错误、重试和最终输出。
+- **报告规则**：哪些 run 被计入，哪些被跳过，超时、崩溃、空回答怎样算。
+- **成本与时间**：token、工具调用、API 费用、墙钟时间和并发设置。
+- **评分视图**：最终答案分、环境状态分、过程分、人工抽检结果分别怎么算。
+- **drops manifest**：失败、报错、跳过的样本不能消失，要单独列出来。
+
+这和传统 RL 的直觉是一致的：策略不是在一个孤立答案上学习，而是在一条条 trajectory / rollout 上暴露能力。对 Agentic RL 来说，rollout card 的价值在于让“模型 A 比模型 B 高 3 分”变成可追问的问题：到底是更会完成任务，还是更会规避失败样本？是成功率提高，还是成本翻倍换来的？是过程更稳，还是报告规则变了？
 
 ## 三类标准测试怎么跑
 
@@ -649,6 +680,14 @@ RL 后训练 benchmark 的核心是**分清真实能力、偏好胜率和 reward
 
 [^mtbench]: Lianmin Zheng et al. [Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena](https://arxiv.org/abs/2306.05685), NeurIPS 2023.
 
+[^geval]: Yang Liu et al. [G-EVAL: NLG Evaluation using GPT-4 with Better Human Alignment](https://arxiv.org/abs/2303.16634), EMNLP 2023.
+
+[^majeval]: Weiqi Wang et al. [Multi-Agent-as-Judge: Aligning LLM-Agent-Based Automated Evaluation with Multi-Dimensional Human Evaluation](https://arxiv.org/abs/2507.21028), arXiv 2025.
+
+[^deepeval]: Confident AI. [DeepEval Documentation](https://deepeval.com/docs/introduction), accessed 2026-05-14.
+
+[^agentevals]: LangChain. [agentevals: Readymade evaluators for agent trajectories](https://github.com/langchain-ai/agentevals), accessed 2026-05-14; AgentEvals. [Score Agent Behavior from OpenTelemetry Traces](https://aevals.ai/), accessed 2026-05-14.
+
 [^ifeval]: Jeffrey Zhou et al. [Instruction-Following Evaluation for Large Language Models](https://arxiv.org/abs/2311.07911), arXiv 2023.
 
 [^gsm8k]: Karl Cobbe et al. [Training Verifiers to Solve Math Word Problems](https://arxiv.org/abs/2110.14168), arXiv 2021.
@@ -682,6 +721,12 @@ RL 后训练 benchmark 的核心是**分清真实能力、偏好胜率和 reward
 [^swebench]: Carlos E. Jimenez et al. [SWE-bench: Can Language Models Resolve Real-World GitHub Issues?](https://arxiv.org/abs/2310.06770), ICLR 2024.
 
 [^gaia]: Grégoire Mialon et al. [GAIA: a Benchmark for General AI Assistants](https://arxiv.org/abs/2311.12983), ICLR 2024.
+
+[^clawevallive]: Chenxin Li et al. [Claw-Eval-Live: A Live Agent Benchmark for Evolving Real-World Workflows](https://arxiv.org/abs/2604.28139), arXiv 2026.
+
+[^clawwork]: HKUDS. [ClawWork: OpenClaw as Your AI Coworker](https://github.com/HKUDS/ClawWork), accessed 2026-05-14.
+
+[^rolloutcards]: Charlie Masters, Ziyuan Liu, and Stefano V. Albrecht. [Rollout Cards: A Reproducibility Standard for Agent Research](https://arxiv.org/abs/2605.12131), arXiv 2026.
 
 [^osworld]: Tianbao Xie et al. [OSWorld: Benchmarking Multimodal Agents for Open-Ended Tasks in Real Computer Environments](https://arxiv.org/abs/2404.07972), NeurIPS 2024.
 

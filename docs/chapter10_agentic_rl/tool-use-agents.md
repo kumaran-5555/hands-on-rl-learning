@@ -593,7 +593,7 @@ Agentic RL 不是凭空出现的——它和前面章节学过的几乎所有概
 
 值得注意的是，经验回放在 Agentic RL 中的使用比在标准 DQN 中更加微妙。DQN 的经验回放可以直接复用旧数据，因为环境是确定的（CartPole 的物理规律不变）。但 Agentic RL 中，工具的执行结果可能随时间变化（搜索引擎的结果会更新），所以旧轨迹可能不再有效。这意味着 Agentic RL 的经验回放需要**过期机制**——超过一定时间或者环境状态发生变化的旧轨迹应该被丢弃。
 
-训练完之后，怎么知道你的 Agent 到底好不好？评测与 Benchmark 是 Agentic RL 中一个足够大的话题——从工具调用排行榜到端到端任务基准，从评测 Pipeline 搭建到评测驱动训练改进的闭环——我们把它独立成了一节：**[Agentic 评测体系与 Benchmark 全景](./evaluation-benchmarks)**。
+训练完之后，怎么知道你的 Agent 到底好不好？评测与 Benchmark 是 Agentic RL 中一个足够大的话题——从工具调用排行榜到端到端任务基准，从评测 Pipeline 搭建到评测驱动训练改进的闭环——我们会在 **[10.3 节：工业实践、评测与 Badcase](./industrial-evaluation)** 里统一讨论。
 
 ## Agent 奖励设计与评估体系
 
