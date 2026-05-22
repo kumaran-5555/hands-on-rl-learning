@@ -13,7 +13,7 @@ $$J(\theta) = \mathbb{E}_{\pi_\theta} \left[ \sum_{t=0}^{\infty} \gamma^t r_t \r
 | $\theta$                  | 策略参数 | 神经网络的权重——调它们就改变策略的行为               |
 | $\pi_\theta$              | 策略函数 | 给定状态，输出每个动作的概率分布                     |
 | $J(\theta)$               | 目标函数 | 策略的"成绩单"——参数为 $\theta$ 的策略平均能拿多少分 |
-| $\mathbb{E}_{\pi_\theta}$ | 期望     | 按策略 $\pi_\theta$ 行动很多很多次，取平均           |
+| $\mathbb{E}_{\pi\theta}$  | 期望     | 按策略 $\pi_\theta$ 行动很多很多次，取平均           |
 | $\gamma^t r_t$            | 折扣奖励 | 第 $t$ 步的奖励，越远未来的奖励越"不值钱"            |
 
 $J(\theta)$ 就是北极星——目标很简单：找到让 $J(\theta)$ 最大的参数 $\theta$。
