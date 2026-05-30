@@ -131,6 +131,10 @@ const readingToolsCopy = computed(() =>
         switchDark: '切换到深色模式'
       }
 )
+const fontSizeLabel = computed(() => `${clampFontSize(fontSize.value)}px`)
+const lineHeightLabel = computed(() =>
+  clampLineHeight(lineHeight.value).toFixed(2)
+)
 const homeTypingText = computed(
   () =>
     frontmatter.value.hero?.typingTagline ||
@@ -512,19 +516,43 @@ function cleanupMermaidViewer() {
 }
 
 function resetFontSize() {
-  fontSize.value = DEFAULT_FONT_SIZE
+  setFontSize(DEFAULT_FONT_SIZE)
 }
 
 function resetLineHeight() {
-  lineHeight.value = DEFAULT_LINE_HEIGHT
+  setLineHeight(DEFAULT_LINE_HEIGHT)
+}
+
+function setFontSize(value) {
+  fontSize.value = clampFontSize(value)
+}
+
+function setLineHeight(value) {
+  lineHeight.value = clampLineHeight(value)
 }
 
 function decreaseFontSize() {
-  fontSize.value = clampFontSize(fontSize.value - 1)
+  setFontSize(fontSize.value - 1)
 }
 
 function increaseFontSize() {
-  fontSize.value = clampFontSize(fontSize.value + 1)
+  setFontSize(fontSize.value + 1)
+}
+
+function decreaseLineHeight() {
+  setLineHeight(lineHeight.value - 0.05)
+}
+
+function increaseLineHeight() {
+  setLineHeight(lineHeight.value + 0.05)
+}
+
+function updateFontSizeFromRange(event) {
+  setFontSize(event.currentTarget.valueAsNumber)
+}
+
+function updateLineHeightFromRange(event) {
+  setLineHeight(event.currentTarget.valueAsNumber)
 }
 
 function getSidebarLeftBoundary() {
@@ -793,6 +821,9 @@ onBeforeUnmount(() => {
 
 watch(fontSize, (next) => {
   const normalized = clampFontSize(next)
+  if (fontSize.value !== normalized) {
+    fontSize.value = normalized
+  }
   applyFontSize(normalized)
   if (typeof localStorage !== 'undefined') {
     localStorage.setItem(FONT_SIZE_STORAGE_KEY, String(normalized))
@@ -801,6 +832,9 @@ watch(fontSize, (next) => {
 
 watch(lineHeight, (next) => {
   const normalized = clampLineHeight(next)
+  if (lineHeight.value !== normalized) {
+    lineHeight.value = normalized
+  }
   applyLineHeight(normalized)
   if (typeof localStorage !== 'undefined') {
     localStorage.setItem(LINE_HEIGHT_STORAGE_KEY, String(normalized))
@@ -854,128 +888,140 @@ watch(
           <PopoverPortal>
             <Transition name="ct-reading-tools-fade">
               <PopoverContent
-                class="ct-reading-tools-panel"
+                class="ct-popover-content"
                 :side-offset="10"
                 align="end"
                 side="bottom"
               >
-                <div class="ct-reading-tools-group">
-                  <div class="ct-reading-tools-header">
-                    <div class="ct-reading-tools-title">
-                      {{ readingToolsCopy.appearance }}
+                <div class="ct-popover-surface ct-reading-tools-panel">
+                  <div class="ct-reading-tools-group">
+                    <div class="ct-reading-tools-header">
+                      <div class="ct-reading-tools-title">
+                        {{ readingToolsCopy.appearance }}
+                      </div>
+                      <div class="ct-reading-tools-value">
+                        {{
+                          isDark
+                            ? readingToolsCopy.dark
+                            : readingToolsCopy.light
+                        }}
+                      </div>
                     </div>
-                    <div class="ct-reading-tools-value">
-                      {{
-                        isDark ? readingToolsCopy.dark : readingToolsCopy.light
-                      }}
+                    <div
+                      class="ct-appearance-toggle"
+                      role="group"
+                      :aria-label="readingToolsCopy.appearance"
+                    >
+                      <button
+                        class="ct-reading-tools-action"
+                        :class="{ active: !isDark }"
+                        type="button"
+                        :aria-label="readingToolsCopy.switchLight"
+                        @click="setAppearance(false)"
+                      >
+                        <Sun :size="18" :stroke-width="2" aria-hidden="true" />
+                      </button>
+                      <button
+                        class="ct-reading-tools-action"
+                        :class="{ active: isDark }"
+                        type="button"
+                        :aria-label="readingToolsCopy.switchDark"
+                        @click="setAppearance(true)"
+                      >
+                        <Moon
+                          :size="18"
+                          :stroke-width="2"
+                          aria-hidden="true"
+                        />
+                      </button>
                     </div>
                   </div>
-                  <div
-                    class="ct-appearance-toggle"
-                    role="group"
-                    :aria-label="readingToolsCopy.appearance"
-                  >
-                    <button
-                      class="ct-reading-tools-action"
-                      :class="{ active: !isDark }"
-                      type="button"
-                      :aria-label="readingToolsCopy.switchLight"
-                      @click="setAppearance(false)"
-                    >
-                      <Sun :size="18" :stroke-width="2" aria-hidden="true" />
-                    </button>
-                    <button
-                      class="ct-reading-tools-action"
-                      :class="{ active: isDark }"
-                      type="button"
-                      :aria-label="readingToolsCopy.switchDark"
-                      @click="setAppearance(true)"
-                    >
-                      <Moon :size="18" :stroke-width="2" aria-hidden="true" />
-                    </button>
-                  </div>
-                </div>
 
-                <div class="ct-reading-tools-group">
-                  <div class="ct-reading-tools-header">
-                    <div class="ct-reading-tools-title">
-                      {{ readingToolsCopy.fontSize }}
+                  <div class="ct-reading-tools-group">
+                    <div class="ct-reading-tools-header">
+                      <div class="ct-reading-tools-title">
+                        {{ readingToolsCopy.fontSize }}
+                      </div>
+                      <div class="ct-reading-tools-value">
+                        {{ fontSizeLabel }}
+                      </div>
                     </div>
-                    <div class="ct-reading-tools-value">{{ fontSize }}px</div>
+                    <div class="ct-reading-tools-actions">
+                      <button
+                        class="ct-reading-tools-action"
+                        type="button"
+                        @click="decreaseFontSize"
+                      >
+                        {{ readingToolsCopy.decreaseFont }}
+                      </button>
+                      <button
+                        class="ct-reading-tools-action"
+                        type="button"
+                        @click="resetFontSize"
+                      >
+                        {{ readingToolsCopy.default }}
+                      </button>
+                      <button
+                        class="ct-reading-tools-action"
+                        type="button"
+                        @click="increaseFontSize"
+                      >
+                        {{ readingToolsCopy.increaseFont }}
+                      </button>
+                    </div>
+                    <input
+                      class="ct-reading-tools-range"
+                      type="range"
+                      :value="fontSize"
+                      :min="MIN_FONT_SIZE"
+                      :max="MAX_FONT_SIZE"
+                      step="1"
+                      @input="updateFontSizeFromRange"
+                    />
                   </div>
-                  <div class="ct-reading-tools-actions">
-                    <button
-                      class="ct-reading-tools-action"
-                      type="button"
-                      @click="decreaseFontSize"
-                    >
-                      {{ readingToolsCopy.decreaseFont }}
-                    </button>
-                    <button
-                      class="ct-reading-tools-action"
-                      type="button"
-                      @click="resetFontSize"
-                    >
-                      {{ readingToolsCopy.default }}
-                    </button>
-                    <button
-                      class="ct-reading-tools-action"
-                      type="button"
-                      @click="increaseFontSize"
-                    >
-                      {{ readingToolsCopy.increaseFont }}
-                    </button>
-                  </div>
-                  <input
-                    v-model="fontSize"
-                    class="ct-reading-tools-range"
-                    type="range"
-                    :min="MIN_FONT_SIZE"
-                    :max="MAX_FONT_SIZE"
-                    step="1"
-                  />
-                </div>
 
-                <div class="ct-reading-tools-group">
-                  <div class="ct-reading-tools-header">
-                    <div class="ct-reading-tools-title">
-                      {{ readingToolsCopy.lineHeight }}
+                  <div class="ct-reading-tools-group">
+                    <div class="ct-reading-tools-header">
+                      <div class="ct-reading-tools-title">
+                        {{ readingToolsCopy.lineHeight }}
+                      </div>
+                      <div class="ct-reading-tools-value">
+                        {{ lineHeightLabel }}
+                      </div>
                     </div>
-                    <div class="ct-reading-tools-value">
-                      {{ lineHeight.toFixed(2) }}
+                    <div class="ct-reading-tools-actions">
+                      <button
+                        class="ct-reading-tools-action"
+                        type="button"
+                        @click="decreaseLineHeight"
+                      >
+                        {{ readingToolsCopy.tighter }}
+                      </button>
+                      <button
+                        class="ct-reading-tools-action"
+                        type="button"
+                        @click="resetLineHeight"
+                      >
+                        {{ readingToolsCopy.default }}
+                      </button>
+                      <button
+                        class="ct-reading-tools-action"
+                        type="button"
+                        @click="increaseLineHeight"
+                      >
+                        {{ readingToolsCopy.looser }}
+                      </button>
                     </div>
+                    <input
+                      class="ct-reading-tools-range"
+                      type="range"
+                      :value="lineHeight"
+                      :min="MIN_LINE_HEIGHT"
+                      :max="MAX_LINE_HEIGHT"
+                      step="0.05"
+                      @input="updateLineHeightFromRange"
+                    />
                   </div>
-                  <div class="ct-reading-tools-actions">
-                    <button
-                      class="ct-reading-tools-action"
-                      type="button"
-                      @click="lineHeight = clampLineHeight(lineHeight - 0.05)"
-                    >
-                      {{ readingToolsCopy.tighter }}
-                    </button>
-                    <button
-                      class="ct-reading-tools-action"
-                      type="button"
-                      @click="resetLineHeight"
-                    >
-                      {{ readingToolsCopy.default }}
-                    </button>
-                    <button
-                      class="ct-reading-tools-action"
-                      type="button"
-                      @click="lineHeight = clampLineHeight(lineHeight + 0.05)"
-                    >
-                      {{ readingToolsCopy.looser }}
-                    </button>
-                  </div>
-                  <input
-                    v-model="lineHeight"
-                    class="ct-reading-tools-range"
-                    type="range"
-                    :min="MIN_LINE_HEIGHT"
-                    :max="MAX_LINE_HEIGHT"
-                    step="0.05"
-                  />
                 </div>
               </PopoverContent>
             </Transition>
@@ -997,32 +1043,34 @@ watch(
           <PopoverPortal>
             <Transition name="ct-reading-tools-fade">
               <PopoverContent
-                class="ct-support-panel"
+                class="ct-popover-content"
                 :side-offset="10"
                 align="end"
                 side="bottom"
               >
-                <a
-                  class="ct-support-link"
-                  href="https://github.com/walkinglabs"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <span>WalkingLab</span>
-                  <span>GitHub</span>
-                </a>
-                <div class="ct-support-qr-card">
-                  <img
-                    src="https://github.com/walkinglabs/.github/raw/main/profile/wechat.png"
-                    alt="WalkingLab 微信二维码"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                  <div>{{ supportQrLabel }}</div>
+                <div class="ct-popover-surface ct-support-panel">
+                  <a
+                    class="ct-support-link"
+                    href="https://github.com/walkinglabs"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <span>WalkingLab</span>
+                    <span>GitHub</span>
+                  </a>
+                  <div class="ct-support-qr-card">
+                    <img
+                      src="https://github.com/walkinglabs/.github/raw/main/profile/wechat.png"
+                      alt="WalkingLab 微信二维码"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                    <div>{{ supportQrLabel }}</div>
+                  </div>
+                  <p class="ct-support-note">
+                    {{ supportNote }}
+                  </p>
                 </div>
-                <p class="ct-support-note">
-                  {{ supportNote }}
-                </p>
               </PopoverContent>
             </Transition>
           </PopoverPortal>
@@ -1230,17 +1278,24 @@ watch(
   color: rgba(29, 29, 31, 0.82);
 }
 
+.ct-popover-content {
+  z-index: 40;
+  outline: none;
+}
+
+.ct-popover-surface {
+  transform: translateY(0) scale(1);
+  transform-origin: var(--reka-popover-content-transform-origin, top right);
+  will-change: transform;
+}
+
 .ct-reading-tools-panel {
-  position: absolute;
-  top: calc(100% + 10px);
-  right: 0;
   width: 280px;
   padding: 14px;
   border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.96);
+  background: #fff;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
-  z-index: 40;
 }
 
 .ct-reading-tools-group {
@@ -1310,6 +1365,13 @@ watch(
   gap: 8px;
 }
 
+.ct-appearance-toggle .ct-reading-tools-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
 .ct-reading-tools-range {
   width: 100%;
   accent-color: var(--vp-c-brand-1);
@@ -1320,9 +1382,8 @@ watch(
   padding: 12px;
   border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.96);
+  background: #fff;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
-  z-index: 40;
 }
 
 .ct-support-link {
@@ -1382,15 +1443,59 @@ watch(
 
 .ct-reading-tools-fade-enter-active,
 .ct-reading-tools-fade-leave-active {
-  transition:
-    opacity 0.18s ease,
-    transform 0.18s ease;
+  transition: opacity 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.ct-reading-tools-fade-enter-active .ct-popover-surface {
+  animation: ct-popover-surface-enter 0.18s cubic-bezier(0.22, 1, 0.36, 1)
+    both;
+}
+
+.ct-reading-tools-fade-leave-active .ct-popover-surface {
+  animation: ct-popover-surface-leave 0.14s ease both;
 }
 
 .ct-reading-tools-fade-enter-from,
 .ct-reading-tools-fade-leave-to {
   opacity: 0;
-  transform: translateY(-6px);
+}
+
+@keyframes ct-popover-surface-enter {
+  from {
+    transform: translateY(-4px) scale(0.98);
+  }
+
+  to {
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes ct-popover-surface-leave {
+  from {
+    transform: translateY(0) scale(1);
+  }
+
+  to {
+    transform: translateY(-4px) scale(0.98);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ct-reading-tools-fade-enter-active,
+  .ct-reading-tools-fade-leave-active,
+  .ct-reading-tools-fade-enter-active .ct-popover-surface,
+  .ct-reading-tools-fade-leave-active .ct-popover-surface {
+    transition: none;
+  }
+
+  .ct-reading-tools-fade-enter-active .ct-popover-surface,
+  .ct-reading-tools-fade-leave-active .ct-popover-surface {
+    animation: none;
+  }
+
+  .ct-popover-surface {
+    transform: none;
+  }
 }
 
 .ct-route-loading {
@@ -1598,11 +1703,16 @@ watch(
 }
 
 .dark .ct-nav-tool-button,
-.dark .ct-reading-tools-panel,
-.dark .ct-support-panel,
 .dark .ct-sidebar-toggle-btn {
   border-color: rgba(255, 255, 255, 0.12);
   background: rgba(30, 30, 40, 0.92);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+}
+
+.dark .ct-reading-tools-panel,
+.dark .ct-support-panel {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgb(30, 30, 40);
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
 }
 
