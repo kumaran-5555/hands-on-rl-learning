@@ -127,6 +127,7 @@
    =================================================== */
 :root {
   --vp-layout-max-width: 100%;
+  --vp-doc-content-max-width: 980px;
   --vp-sidebar-width: 212px;
   --vp-sidebar-nav-section-gap: 8px;
 }
@@ -1170,6 +1171,18 @@ aside.VPSidebar:hover {
   z-index: 1;
 }
 
+.vp-doc blockquote ul,
+.vp-doc blockquote ol {
+  display: inline-block;
+  margin: 1rem auto 0;
+  padding-left: 1.4em;
+  text-align: left;
+}
+
+.vp-doc blockquote li {
+  text-align: left;
+}
+
 .dark .vp-doc blockquote {
   color: #7986cb;
 }
@@ -1580,7 +1593,8 @@ mjx-container[display='true'] {
 }
 
 .VPDoc > .container > .content > .content-container {
-  max-width: 100% !important;
+  max-width: min(100%, var(--vp-doc-content-max-width)) !important;
+  margin: 0 auto;
 }
 
 @media (min-width: 1280px) {

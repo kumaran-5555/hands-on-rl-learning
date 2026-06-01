@@ -21,6 +21,7 @@ const router = useRouter()
 
 const FONT_SIZE_STORAGE_KEY = 'ct-doc-font-size'
 const LINE_HEIGHT_STORAGE_KEY = 'ct-doc-line-height'
+const DOC_WIDTH_STORAGE_KEY = 'ct-doc-content-width'
 const SIDEBAR_COLLAPSED_KEY = 'ct-sidebar-collapsed'
 const SIDEBAR_WIDTH_KEY = 'ct-sidebar-width-compact-v3'
 
@@ -30,6 +31,9 @@ const DEFAULT_FONT_SIZE = 16
 const MIN_LINE_HEIGHT = 1.55
 const MAX_LINE_HEIGHT = 2
 const DEFAULT_LINE_HEIGHT = 1.75
+const MIN_DOC_WIDTH = 780
+const MAX_DOC_WIDTH = 1280
+const DEFAULT_DOC_WIDTH = 980
 
 const DEFAULT_SIDEBAR_WIDTH = 212
 const MIN_SIDEBAR_WIDTH = 160
@@ -37,6 +41,7 @@ const MAX_SIDEBAR_WIDTH = 520
 
 const fontSize = ref(DEFAULT_FONT_SIZE)
 const lineHeight = ref(DEFAULT_LINE_HEIGHT)
+const docWidth = ref(DEFAULT_DOC_WIDTH)
 const readingToolsOpen = ref(false)
 const supportOpen = ref(false)
 const sidebarCollapsed = ref(false)
@@ -108,9 +113,12 @@ const readingToolsCopy = computed(() =>
         dark: 'Dark',
         fontSize: 'Font size',
         lineHeight: 'Line height',
+        docWidth: 'Content width',
         decreaseFont: 'A-',
         increaseFont: 'A+',
         default: 'Default',
+        narrower: 'Narrower',
+        wider: 'Wider',
         tighter: 'Tighter',
         looser: 'Looser',
         switchLight: 'Switch to light mode',
@@ -122,9 +130,12 @@ const readingToolsCopy = computed(() =>
         dark: '深色',
         fontSize: '字号',
         lineHeight: '行距',
+        docWidth: '正文宽度',
         decreaseFont: 'A-',
         increaseFont: 'A+',
         default: '默认',
+        narrower: '更窄',
+        wider: '更宽',
         tighter: '更紧',
         looser: '更松',
         switchLight: '切换到浅色模式',
@@ -206,6 +217,12 @@ function clampLineHeight(value) {
   return Math.min(MAX_LINE_HEIGHT, Math.max(MIN_LINE_HEIGHT, numeric))
 }
 
+function clampDocWidth(value) {
+  const numeric = Number(value)
+  if (!Number.isFinite(numeric)) return DEFAULT_DOC_WIDTH
+  return Math.min(MAX_DOC_WIDTH, Math.max(MIN_DOC_WIDTH, numeric))
+}
+
 function getSidebarWidthBounds() {
   if (typeof window === 'undefined') {
     return { min: MIN_SIDEBAR_WIDTH, max: MAX_SIDEBAR_WIDTH }
@@ -237,6 +254,14 @@ function applyLineHeight(value) {
   document.documentElement.style.setProperty(
     '--ct-doc-line-height',
     String(value)
+  )
+}
+
+function applyDocWidth(width) {
+  if (typeof document === 'undefined') return
+  document.documentElement.style.setProperty(
+    '--vp-doc-content-max-width',
+    `${width}px`
   )
 }
 
@@ -531,6 +556,10 @@ function setLineHeight(value) {
   lineHeight.value = clampLineHeight(value)
 }
 
+function resetDocWidth() {
+  docWidth.value = DEFAULT_DOC_WIDTH
+}
+
 function decreaseFontSize() {
   setFontSize(fontSize.value - 1)
 }
@@ -553,6 +582,14 @@ function updateFontSizeFromRange(event) {
 
 function updateLineHeightFromRange(event) {
   setLineHeight(event.currentTarget.valueAsNumber)
+}
+
+function narrowDocWidth() {
+  docWidth.value = clampDocWidth(docWidth.value - 40)
+}
+
+function widenDocWidth() {
+  docWidth.value = clampDocWidth(docWidth.value + 40)
 }
 
 function getSidebarLeftBoundary() {
@@ -771,13 +808,18 @@ onMounted(() => {
   const savedLineHeight = clampLineHeight(
     localStorage.getItem(LINE_HEIGHT_STORAGE_KEY)
   )
+  const savedDocWidth = clampDocWidth(
+    localStorage.getItem(DOC_WIDTH_STORAGE_KEY)
+  )
   const savedSidebarWidth = localStorage.getItem(SIDEBAR_WIDTH_KEY)
   const savedCollapsed = localStorage.getItem(SIDEBAR_COLLAPSED_KEY)
 
   fontSize.value = savedFontSize
   lineHeight.value = savedLineHeight
+  docWidth.value = savedDocWidth
   applyFontSize(savedFontSize)
   applyLineHeight(savedLineHeight)
+  applyDocWidth(savedDocWidth)
 
   if (savedSidebarWidth) {
     setSidebarWidth(savedSidebarWidth, false)
@@ -838,6 +880,14 @@ watch(lineHeight, (next) => {
   applyLineHeight(normalized)
   if (typeof localStorage !== 'undefined') {
     localStorage.setItem(LINE_HEIGHT_STORAGE_KEY, String(normalized))
+  }
+})
+
+watch(docWidth, (next) => {
+  const normalized = clampDocWidth(next)
+  applyDocWidth(normalized)
+  if (typeof localStorage !== 'undefined') {
+    localStorage.setItem(DOC_WIDTH_STORAGE_KEY, String(normalized))
   }
 })
 
@@ -1022,6 +1072,46 @@ watch(
                       @input="updateLineHeightFromRange"
                     />
                   </div>
+                </div>
+
+                <div class="ct-reading-tools-group">
+                  <div class="ct-reading-tools-header">
+                    <div class="ct-reading-tools-title">
+                      {{ readingToolsCopy.docWidth }}
+                    </div>
+                    <div class="ct-reading-tools-value">{{ docWidth }}px</div>
+                  </div>
+                  <div class="ct-reading-tools-actions">
+                    <button
+                      class="ct-reading-tools-action"
+                      type="button"
+                      @click="narrowDocWidth"
+                    >
+                      {{ readingToolsCopy.narrower }}
+                    </button>
+                    <button
+                      class="ct-reading-tools-action"
+                      type="button"
+                      @click="resetDocWidth"
+                    >
+                      {{ readingToolsCopy.default }}
+                    </button>
+                    <button
+                      class="ct-reading-tools-action"
+                      type="button"
+                      @click="widenDocWidth"
+                    >
+                      {{ readingToolsCopy.wider }}
+                    </button>
+                  </div>
+                  <input
+                    v-model.number="docWidth"
+                    class="ct-reading-tools-range"
+                    type="range"
+                    :min="MIN_DOC_WIDTH"
+                    :max="MAX_DOC_WIDTH"
+                    step="20"
+                  />
                 </div>
               </PopoverContent>
             </Transition>

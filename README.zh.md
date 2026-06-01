@@ -397,11 +397,13 @@ npm run verify        # 运行格式检查、Lint、构建和产物验证
 
 [![LEARN HARNESS ENGINEERING](https://img.shields.io/badge/LEARN_HARNESS_ENGINEERING-0052cc?style=for-the-badge)](https://github.com/walkinglabs/learn-harness-engineering)
 
-## WeChat Group (微信)
+[![MODERN LLM NOTEBOOK](https://img.shields.io/badge/MODERN_LLM_NOTEBOOK-0052cc?style=for-the-badge)](https://github.com/walkinglabs/modern-llm-notebook)
 
-有任何建议 / 反馈，欢迎扫码加入 WeChat Group（微信）交流：
+## 读者交流群（微信）
 
-<img src="https://github.com/walkinglabs/.github/raw/main/profile/wechat.png" alt="WeChat Group" width="300" />
+有任何建议 / 反馈，欢迎扫码加入读者交流群（微信）：
+
+<img src="https://github.com/walkinglabs/.github/raw/main/profile/wechat.png" alt="读者交流群" width="300" />
 
 ## 引用
 
