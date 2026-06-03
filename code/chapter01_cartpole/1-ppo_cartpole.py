@@ -20,11 +20,13 @@
 
 import argparse
 import os
+import sys
 import numpy as np
 import gymnasium as gym
-from stable_baselines3 import PPO
+from stable_baselines3 import PPO 
 from stable_baselines3.common.callbacks import BaseCallback
 from stable_baselines3.common.evaluation import evaluate_policy
+from stable_baselines3.common.logger import HumanOutputFormat
 from swanlab.integration.sb3 import SwanLabCallback
 import swanlab
 
@@ -51,6 +53,28 @@ class LogApproxKL(BaseCallback):
         if hasattr(logger, "name_to_value") and "train/approx_kl" in logger.name_to_value:
             value = float(logger.name_to_value["train/approx_kl"])
             swanlab.log({"train/approx_kl": value}, step=self.num_timesteps)
+
+
+class RestoreStdoutLog(BaseCallback):
+    """把 SB3 往终端打印的滚动日志表格加回来。
+
+    SwanLabCallback._init_callback() 内部会调用 self.model.set_logger(...)，
+    用一个"只写 SwanLab"的 logger 整体替换掉 SB3 默认 logger，
+    顺带删掉了负责往 stdout 打印 ep_rew_mean / fps / approx_kl 表格的
+    HumanOutputFormat（即 verbose=1 的滚动日志）。
+
+    本回调在 _init_callback 阶段执行（此时 SwanLabCallback 已替换完 logger），
+    向当前 logger 补回一个 stdout 输出端，于是终端重新滚动打印，
+    同时 SwanLab 记录不受影响。需放在 callback 列表中 SwanLabCallback 之后。
+    """
+
+    def _init_callback(self) -> None:
+        # SwanLabCallback 已把 logger 换成只含 SwanLabOutputFormat，
+        # 这里补回一个 stdout 输出端，即可恢复 verbose=1 的滚动表格。
+        self.model.logger.output_formats.append(HumanOutputFormat(sys.stdout))
+
+    def _on_step(self) -> bool:
+        return True
 
 
 def parse_args():
@@ -94,7 +118,7 @@ def main():
     )
     model.learn(
         total_timesteps=80000,
-        callback=[swanlab_cb, LogApproxKL()],
+        callback=[swanlab_cb, RestoreStdoutLog(), LogApproxKL()],
     )
 
     # 评估

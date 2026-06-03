@@ -16,6 +16,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -25,6 +26,7 @@ import ale_py
 from stable_baselines3 import DQN
 from stable_baselines3.common.callbacks import BaseCallback, CallbackList, CheckpointCallback, EvalCallback
 from stable_baselines3.common.env_util import make_atari_env
+from stable_baselines3.common.logger import HumanOutputFormat
 from stable_baselines3.common.utils import set_random_seed
 from stable_baselines3.common.vec_env import VecFrameStack, VecTransposeImage
 
@@ -128,6 +130,24 @@ class SwanLabEvalCallback(BaseCallback):
             },
             step=step,
         )
+        return True
+
+
+class RestoreStdoutLog(BaseCallback):
+    """Restore SB3's rolling stdout log table that SwanLabCallback removes.
+
+    SwanLabCallback._init_callback() calls self.model.set_logger(...) and
+    replaces SB3's default logger with a SwanLab-only one, dropping the
+    HumanOutputFormat that prints the verbose=1 progress table to stdout.
+    This callback re-adds an stdout output format after that replacement,
+    so the terminal table reappears without affecting SwanLab logging.
+    Add it after SwanLabCallback in the callback list.
+    """
+
+    def _init_callback(self) -> None:
+        self.model.logger.output_formats.append(HumanOutputFormat(sys.stdout))
+
+    def _on_step(self) -> bool:
         return True
 
 
@@ -329,6 +349,7 @@ def main() -> None:
     swanlab_callback = maybe_make_swanlab_callback(args)
     if swanlab_callback is not None:
         callbacks.append(swanlab_callback)
+        callbacks.append(RestoreStdoutLog())
         callbacks.append(SwanLabEvalCallback(eval_csv_path))
 
     try:
