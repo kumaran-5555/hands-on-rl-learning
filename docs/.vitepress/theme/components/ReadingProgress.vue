@@ -293,10 +293,20 @@ onUnmounted(() => {
   }
 }
 
-.dark .ct-progress-ring-bg,
+.dark .ct-progress-ring-bg {
+  fill: rgba(15, 23, 42, 0.94);
+  stroke: rgba(148, 163, 184, 0.28);
+}
+
+.dark .ct-progress-text {
+  color: #f8fafc;
+  text-shadow: 0 1px 2px rgba(2, 6, 23, 0.55);
+}
+
 .dark .ct-progress-hint {
   border-color: rgba(148, 163, 184, 0.18);
   background: rgba(15, 23, 42, 0.88);
+  color: #e2e8f0;
 }
 
 @media (max-width: 768px) {

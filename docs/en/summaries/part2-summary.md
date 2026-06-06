@@ -276,4 +276,4 @@ Part 2 followed a full theoretical arc: MDP provides the language of decision pr
 
 Every concept on this path will reappear in later LLM alignment chapters. Understanding PPO clipping helps you understand GRPO's within-group normalization; understanding the Actor-Critic division of labor helps you understand the roles of the four models in RLHF.
 
-> **Next stop**: [Part 3: The LLM Era](/chapter09_alignment/intro)
+> **Next stop**: [Part 3: The LLM Era](/en/chapter08_rlhf/intro)
