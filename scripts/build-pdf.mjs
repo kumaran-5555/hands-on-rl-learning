@@ -1,44 +1,41 @@
+/* global process */
 import { spawnSync } from 'node:child_process'
 import fs from 'node:fs'
 import http from 'node:http'
 import path from 'node:path'
-import { fileURLToPath, pathToFileURL } from 'node:url'
+import {
+  rootDir,
+  docsDir,
+  distDir,
+  packageJson,
+  bookVersion,
+  bookAuthor,
+  bookBuildDate,
+  bookGithubUrl,
+  logoPath as pdfLogoPath,
+  escapeHtml,
+  stripFrontmatter,
+  stripScriptSetup,
+  splitSuffix,
+  pagePathForLink,
+  loadVitePressConfig,
+  loadSidebar,
+  frontMatter
+} from './book-shared.mjs'
 
-const __filename = fileURLToPath(import.meta.url)
-const rootDir = path.resolve(path.dirname(__filename), '..')
-const docsDir = path.join(rootDir, 'docs')
 const generatedDir = path.join(docsDir, '__pdf__')
 const generatedPagePath = path.join(generatedDir, 'index.md')
-const distDir = path.join(docsDir, '.vitepress', 'dist')
-const configPath = path.join(docsDir, '.vitepress', 'config.mjs')
 const publicSitemapPath = path.join(docsDir, 'public', 'sitemap.xml')
-const packageJsonPath = path.join(rootDir, 'package.json')
-const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'))
 const pdfFileName = process.env.PDF_FILE_NAME || `${packageJson.name}.pdf`
 const pdfOutputPath = path.join(distDir, pdfFileName)
 const pdfPrintTimeoutMs = Number(process.env.PDF_PRINT_TIMEOUT_MS || 1200000)
 const resourceWaitTimeoutMs = Number(
   process.env.PDF_RESOURCE_TIMEOUT_MS || 60000
 )
-const pdfVersion = process.env.PDF_VERSION || '0.1.0'
-const pdfSanbuGithubUrl =
-  process.env.PDF_SANBU_GITHUB_URL || 'https://github.com/sanbuphy'
+const pdfVersion = bookVersion
 const pdfGenerateOutline = process.env.PDF_OUTLINE !== '0'
-const pdfAuthor =
-  process.env.PDF_AUTHORS ||
-  process.env.PDF_AUTHOR ||
-  packageJson.author ||
-  `WalkingLabs; 散步 (${pdfSanbuGithubUrl})`
-const pdfBookTagline =
-  '现代强化学习实战指南：涵盖经典控制、LLM 后训练、RLVR 与多模态智能体'
-const pdfBookSubtitle = '现代强化学习实战——从代码到原理'
-const pdfLogoPath = '../public/readme/readmelogo.png'
-const pdfBuildDate =
-  process.env.PDF_BUILD_DATE ||
-  new Intl.DateTimeFormat('zh-CN', {
-    dateStyle: 'long',
-    timeZone: 'Asia/Shanghai'
-  }).format(new Date())
+const pdfAuthor = bookAuthor
+const pdfBuildDate = bookBuildDate
 const skipBuild = process.argv.includes('--skip-build')
 const keepSource = process.argv.includes('--keep-source')
 
@@ -46,50 +43,11 @@ function toPosix(value) {
   return value.split(path.sep).join('/')
 }
 
-function escapeHtml(value) {
-  return String(value)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-}
-
 function escapeAttribute(value) {
   return escapeHtml(value).replace(/'/g, '&#39;')
 }
 
-function repositoryUrl() {
-  if (process.env.PDF_GITHUB_URL) return process.env.PDF_GITHUB_URL
-
-  const githubRepository = process.env.GITHUB_REPOSITORY
-  if (githubRepository && githubRepository.includes('/')) {
-    return `https://github.com/${githubRepository.replace(/\.git$/, '')}`
-  }
-
-  const repository =
-    typeof packageJson.repository === 'string'
-      ? packageJson.repository
-      : packageJson.repository?.url || ''
-
-  const sshMatch = repository.match(/github\.com:(.+?)\/(.+?)(\.git)?$/)
-  if (sshMatch) {
-    return `https://github.com/${sshMatch[1]}/${sshMatch[2]}`
-  }
-
-  const normalized = repository
-    .replace(/^git\+/, '')
-    .replace(/^https?:\/\/github\.com\//, '')
-    .replace(/^git@github\.com:/, '')
-    .replace(/\.git$/, '')
-
-  if (normalized.includes('/')) {
-    return `https://github.com/${normalized}`
-  }
-
-  return 'https://github.com/walkinglabs/hands-on-modern-rl'
-}
-
-const pdfGithubUrl = repositoryUrl()
+const pdfGithubUrl = bookGithubUrl
 const pdfHeaderFooterStyle = [
   'width:100%',
   'box-sizing:border-box',
@@ -140,18 +98,6 @@ function pdfFooterTemplate() {
     `<span style="${pdfFooterPageStyle}">Page <span class="pageNumber"></span> / <span class="totalPages"></span></span>`,
     '</div>'
   ].join('')
-}
-
-function stripFrontmatter(value) {
-  if (!value.startsWith('---\n')) return value
-
-  const end = value.indexOf('\n---\n', 4)
-  if (end === -1) return value
-  return value.slice(end + 5)
-}
-
-function stripScriptSetup(value) {
-  return value.replace(/^\s*<script\b[\s\S]*?<\/script>\s*/i, '')
 }
 
 function localizeFootnotes(markdown) {
@@ -329,22 +275,6 @@ function isExternalTarget(value) {
   )
 }
 
-function splitSuffix(value) {
-  const hashIndex = value.indexOf('#')
-  const queryIndex = value.indexOf('?')
-  const suffixIndexes = [hashIndex, queryIndex].filter((index) => index >= 0)
-  const suffixIndex = suffixIndexes.length ? Math.min(...suffixIndexes) : -1
-
-  if (suffixIndex === -1) {
-    return { clean: value, suffix: '' }
-  }
-
-  return {
-    clean: value.slice(0, suffixIndex),
-    suffix: value.slice(suffixIndex)
-  }
-}
-
 function normalizeMarkdownRoute(link) {
   const { clean, suffix } = splitSuffix(link)
   if (!clean.endsWith('.md')) return link
@@ -465,24 +395,6 @@ function rewriteMarkdownLinks(sourcePagePath, markdown, idMap) {
   )
 
   return output
-}
-
-function flattenSidebar(items, pages = [], seen = new Set()) {
-  for (const item of items || []) {
-    if (item.link && !item.link.includes('#') && !seen.has(item.link)) {
-      seen.add(item.link)
-      pages.push({
-        title: item.text || item.link,
-        link: item.link
-      })
-    }
-
-    if (item.items) {
-      flattenSidebar(item.items, pages, seen)
-    }
-  }
-
-  return pages
 }
 
 function pageAnchorForLink(link) {
@@ -647,14 +559,16 @@ function renderToc(tocSections) {
 }
 
 function renderBookCover(pageCount) {
+  const { cover } = frontMatter
+
   return [
     '<section id="pdf-book-cover" class="pdf-export-cover">',
     '  <div class="pdf-cover-top">',
     `    <img class="pdf-cover-logo" src="${escapeAttribute(pdfLogoPath)}" alt="Hands-On Modern RL Logo">`,
-    '    <p class="pdf-cover-kicker">Open Textbook · Modern Reinforcement Learning</p>',
-    '    <h1>Hands-on Modern RL</h1>',
-    `    <p class="pdf-cover-title-zh">${escapeHtml(pdfBookSubtitle)}</p>`,
-    `    <p class="pdf-cover-description">${escapeHtml(pdfBookTagline)}。本书从可运行代码、训练曲线和失败案例出发，逐步进入 MDP、策略梯度、PPO、DPO、GRPO、RLVR、Agentic RL 与多模态强化学习。</p>`,
+    `    <p class="pdf-cover-kicker">${escapeHtml(cover.kicker)}</p>`,
+    `    <h1>${escapeHtml(cover.titleEn)}</h1>`,
+    `    <p class="pdf-cover-title-zh">${escapeHtml(cover.titleZh)}</p>`,
+    `    <p class="pdf-cover-description">${escapeHtml(cover.description)}</p>`,
     '  </div>',
     '  <div class="pdf-cover-bottom">',
     '    <div class="pdf-cover-meta-grid">',
@@ -663,46 +577,45 @@ function renderBookCover(pageCount) {
     `      <p><span>Repository</span><strong>${escapeHtml(pdfGithubUrl)}</strong></p>`,
     `      <p><span>Build</span><strong>${escapeHtml(pdfBuildDate)} · ${pageCount} course pages</strong></p>`,
     '    </div>',
-    '    <p class="pdf-cover-publisher">WalkingLabs Open Course Series</p>',
+    `    <p class="pdf-cover-publisher">${escapeHtml(cover.publisher)}</p>`,
     '  </div>',
     '</section>'
   ].join('\n')
 }
 
 function renderBookIntro(pageCount) {
+  const { intro } = frontMatter
+
   return [
-    '<section id="pdf-book-intro" class="pdf-book-frontmatter">',
-    '<p class="pdf-section-eyebrow">About This Book</p>',
-    '<h1>本书简介</h1>',
-    '<p><strong>Hands-on Modern RL</strong> 是一本面向现代强化学习实践的开放电子书。它不是把网页机械打印成 PDF，而是把课程内容整理成可离线阅读、可引用、可长期迭代的书籍版本。</p>',
-    '<p>本书采用“实践优先”的路径：先从一行行可运行代码、训练曲线、指标诊断和失败现象出发，让读者看到智能体如何在环境中试错、从奖励中改进行为，再回到状态、价值函数、贝尔曼方程、策略梯度、奖励建模和信用分配等核心概念。</p>',
-    '<p>内容从 CartPole、DQN、Actor-Critic 与 PPO 进入 LLM 后训练，继续覆盖 RLHF、DPO、GRPO、RLVR、工具调用智能体、Deep Research、VLM 强化学习、具身智能和多智能体自我博弈等现代主题。</p>',
-    '<h2>本书适合谁</h2>',
+    '<section id=”pdf-book-intro” class=”pdf-book-frontmatter”>',
+    '<p class=”pdf-section-eyebrow”>About This Book</p>',
+    `<h1>${escapeHtml(intro.title)}</h1>`,
+    ...intro.paragraphs.map((p) => `<p>${p}</p>`),
+    `<h2>${escapeHtml(intro.audience.title)}</h2>`,
     '<ul>',
-    '<li>从监督学习转向强化学习的机器学习工程师；</li>',
-    '<li>准备阅读现代强化学习、LLM 对齐和 Agentic RL 论文的研究人员与学生；</li>',
-    '<li>希望理解 RLHF、DPO、GRPO、RLVR 与后训练系统的大模型从业者；</li>',
-    '<li>喜欢先看代码、实验和可视化，再进入公式推导的自主学习者。</li>',
+    ...intro.audience.items.map((item) => `<li>${escapeHtml(item)}</li>`),
     '</ul>',
-    '<h2>如何阅读</h2>',
-    '<p>如果你是第一次接触强化学习，建议按章节顺序阅读；如果你已经熟悉经典 RL，可以从 PPO、DPO、GRPO 与 Agentic RL 章节开始，并在需要时回到前面的数学和算法章节补齐概念。</p>',
+    `<h2>${escapeHtml(intro.howToRead.title)}</h2>`,
+    ...intro.howToRead.paragraphs.map((p) => `<p>${escapeHtml(p)}</p>`),
     `<p>本 PDF 共汇编 ${pageCount} 个课程页面，并保留章节开篇页、目录、页眉页脚、参考文献和侧边书签，目标是让它更像一本可持续更新的课本。</p>`,
     '</section>'
   ].join('\n')
 }
 
 function renderPublicationNote() {
+  const { publicationNote } = frontMatter
+
   return [
     '<section id="pdf-publication-note" class="pdf-book-frontmatter">',
     '<p class="pdf-section-eyebrow">Edition Notes</p>',
-    '<h1>版本说明</h1>',
+    `<h1>${escapeHtml(publicationNote.title)}</h1>`,
     `<p><strong>版本：</strong>${escapeHtml(pdfVersion)}，构建日期：${escapeHtml(pdfBuildDate)}。</p>`,
     `<p><strong>作者：</strong>${escapeHtml(pdfAuthor)}。</p>`,
     `<p><strong>项目地址：</strong><a href="${escapeAttribute(pdfGithubUrl)}">${escapeHtml(pdfGithubUrl)}</a>。</p>`,
-    '<p>这是一本随开源课程持续迭代的电子书。v0.1.0 版本已经包含完整目录、章节开篇页、局部参考文献、PDF 书签、封面和前置说明；后续版本会继续补齐更精细的版式、索引、术语表、练习答案与纸质书级别的排版细节。</p>',
-    '<p>正文中如遇到仍处在快速迭代的章节，请优先参考最新 GitHub 仓库。欢迎通过 issue、pull request 或课程讨论渠道修正错误、补充案例和完善练习。</p>',
-    '<h2>授权与引用</h2>',
-    '<p>本书遵循仓库中的开源协议发布，适合学习、教学和非商业传播。引用本书时，请注明书名、版本、作者与 GitHub 仓库地址。</p>',
+    `<p>${escapeHtml(publicationNote.iterationNote)}</p>`,
+    `<p>${escapeHtml(publicationNote.disclaimer)}</p>`,
+    `<h2>${escapeHtml(publicationNote.licenseSection.title)}</h2>`,
+    `<p>${escapeHtml(publicationNote.licenseSection.text)}</p>`,
     '</section>'
   ].join('\n')
 }
@@ -726,28 +639,9 @@ function renderChapterOpener(chapter) {
   ].join('\n')
 }
 
-function pagePathForLink(link) {
-  const { clean } = splitSuffix(link.replace(/^\//, ''))
-  const normalized = clean.replace(/\/$/, '')
-  const candidates = [
-    path.join(docsDir, `${normalized}.md`),
-    path.join(docsDir, normalized, 'index.md')
-  ]
-
-  return candidates.find((candidate) => fs.existsSync(candidate)) || null
-}
-
-async function loadVitePressConfig() {
-  const module = await import(pathToFileURL(configPath).href)
-  return module.default
-}
-
 async function generatePdfSource() {
   const config = await loadVitePressConfig()
-  const sidebar =
-    config.locales?.zh?.themeConfig?.sidebar?.['/'] ||
-    config.themeConfig?.sidebar?.['/'] ||
-    []
+  const sidebar = loadSidebar(config)
   const { chunks, tocSections } = collectPdfStructure(sidebar)
   const pageCount = chunks.filter((chunk) => chunk.type === 'page').length
   const missingPages = []
