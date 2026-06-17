@@ -12,13 +12,18 @@ This is a common warm-up question. Before you write DPO or PPO on the whiteboard
 
 ### One-Line Memory
 
-> Subtract `max` first, then `exp`. The denominator is the sum of all exponentials.
+> Subtract the max, then exp, then sum, then divide — stops the numbers from blowing up.
 
 ### Pseudocode
 
 ```
+# Step 1: subtract the max from every number (largest becomes 0; exp can't overflow)
 x_shifted = x - max(x)
+
+# Step 2: exponentiate each value
 exp_x = exp(x_shifted)
+
+# Step 3: divide by the total sum to normalize into probabilities (they sum to 1)
 softmax = exp_x / sum(exp_x)
 ```
 
@@ -61,7 +66,7 @@ def manual_softmax(x, dim=-1):
 
 ### One-Line Memory
 
-> $\log\sum\exp(x) = \max(x) + \log\sum\exp(x - \max(x))$.
+> Don't compute log(softmax) in two steps — use log-sum-exp directly and factor out the max first.
 
 Follow-up question: how do you compute `log(softmax(x))` without overflow? Answer: do not compute softmax first and then take log; use log-softmax directly.
 
@@ -96,12 +101,15 @@ def manual_log_softmax(x, dim=-1):
 
 ### One-Line Memory
 
-> Negative log-probability under a one-hot target: $-\sum_k y_k \log p_k$. With integer labels: $-\log p_y$.
+> How much probability the model gave to the right answer: take that probability, log it, negate.
 
 ### Pseudocode
 
 ```
+# Step 1: pass logits through log_softmax to get each class's log-probability
 log_probs = log_softmax(logits)
+
+# Step 2: pick out the log-prob at the "correct answer" position, negate, and average
 loss = -log_probs[target].mean()
 ```
 

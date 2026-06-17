@@ -12,12 +12,17 @@ Decoding strategies are a frequent LLM interview topic, and they connect directl
 
 ### One-Line Memory
 
-> Divide logits by $T$ and then apply softmax. Larger $T$ means more randomness; smaller $T$ means more determinism.
+> Divide logits by T, then softmax. Large T means more random; small T means more confident.
 
 ### Pseudocode
 
 ```
+# Step 1: divide logits by T
+#   large T -> differences shrink -> probabilities flatten out
+#   small T -> differences grow -> probabilities sharpen
 scaled_logits = logits / temperature
+
+# Step 2: softmax into probabilities
 probs = softmax(scaled_logits)
 ```
 
@@ -49,13 +54,18 @@ def sample_with_temperature(logits, temperature=1.0):
 
 ### One-Line Memory
 
-> Keep only the top-k tokens by probability (or logits). Set the rest to `-inf`, then softmax and sample.
+> Keep only the k most likely tokens; set the rest to -inf and drop them; then sample.
 
 ### Pseudocode
 
 ```
+# Step 1: find the k largest logits and note the threshold
 top_k_values, top_k_indices = topk(logits, k)
+
+# Step 2: set anything below the threshold to -inf (becomes 0 after softmax)
 logits[not in top_k] = -inf
+
+# Step 3: softmax to re-normalize, then sample from the remaining k tokens
 probs = softmax(logits)
 sample from probs
 ```
@@ -107,20 +117,24 @@ def top_k_sample(logits, k, temperature=1.0):
 
 ### One-Line Memory
 
-> Sort tokens by probability from high to low, accumulate until the mass exceeds $p$, and keep only that prefix.
+> Sort tokens by probability high to low; keep adding until the running total reaches p; sample only from those.
 
 ### Pseudocode
 
 ```
+# Step 1: sort logits from largest to smallest
 sorted_logits = sort_desc(logits)
+
+# Step 2: convert to probabilities and accumulate from the top down
 sorted_probs = softmax(sorted_logits)
 cumulative_probs = cumsum(sorted_probs)
 
-# positions past the nucleus are set to -inf
+# Step 3: every position past the cutoff becomes -inf
+#   note: compare (cumsum - current_prob) so we always keep at least one token
 cutoff_mask = cumulative_probs - sorted_probs > p
 sorted_logits[cutoff_mask] = -inf
 
-# restore order, softmax, sample
+# Step 4: restore the original order, softmax, then sample
 ```
 
 ### Intuition

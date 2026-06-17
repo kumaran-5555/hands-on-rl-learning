@@ -10,30 +10,30 @@ title: C.4 GRPO and Reward Models
 
 ### One-Line Memory
 
-> For the same prompt, sample $G$ completions. Normalize rewards within the group (z-score) to form advantages. Plug them into PPO’s clipped loss, then add a KL penalty. No critic is used.
+> No critic. Let the group decide who's good.
 
 ### Pseudocode
 
 ```
-# 1) For a single prompt, sample G completions
+# Step 1: for one prompt, let the model generate G completions
 completions = [generate(prompt) for _ in range(G)]
 
-# 2) Score each completion
+# Step 2: score every completion
 rewards = [reward_fn(c) for c in completions]   # [G]
 
-# 3) Group-wise normalization -> advantage
+# Step 3: normalize inside the group (subtract mean, divide by std) -> treat as the advantage
 advantages = (rewards - mean(rewards)) / (std(rewards) + eps)  # [G]
 
-# 4) PPO clipped loss (using group-wise advantages)
+# Step 4: PPO clipped loss (advantage comes from step 3, not a critic)
 ratio = exp(new_logp - old_logp)
 surr1 = ratio * advantages
 surr2 = clip(ratio, 1-eps, 1+eps) * advantages
 policy_loss = -min(surr1, surr2).mean()
 
-# 5) KL penalty (against a reference model)
+# Step 5: add a KL penalty (pull back, don't drift too far from the reference model)
 kl = kl_penalty(log_probs, ref_log_probs)
 
-# 6) Total
+# Step 6: total loss
 loss = policy_loss + kl_coeff * kl
 ```
 
@@ -127,13 +127,16 @@ def grpo_loss(
 
 ### One-Line Memory
 
-> If the chosen score is higher than the rejected score, `sigmoid` should be close to 1, so `-log` should be close to 0. The whole loss is one line: `-log_sigmoid(r_chosen - r_rejected)`.
+> Train the reward model to score good answers higher than bad ones. One line: `-log_sigmoid(r_chosen - r_rejected)`.
 
 ### Pseudocode
 
 ```
-r_w = reward_model(chosen_input)      # scalar reward for chosen
-r_l = reward_model(rejected_input)    # scalar reward for rejected
+# Step 1: reward model scores both answers
+r_w = reward_model(chosen_input)      # score for the good answer
+r_l = reward_model(rejected_input)    # score for the bad answer
+
+# Step 2: we want the good score higher than the bad one; sigmoid + negative log
 loss = -log(sigmoid(r_w - r_l))
 ```
 

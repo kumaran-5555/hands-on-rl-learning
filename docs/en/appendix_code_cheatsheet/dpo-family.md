@@ -132,7 +132,10 @@ IPO does not use log-sigmoid; it directly regresses to a margin around 0.5.
 ### Pseudocode
 
 ```
+# Step 1: the good-vs-bad gap in log ratios
 delta = log_ratio_chosen - log_ratio_rejected
+
+# Step 2: push delta toward a fixed target 1/(2*beta); squared error does the work
 loss = (delta - 1 / (2 * beta))^2
 ```
 
@@ -150,21 +153,23 @@ def ipo_loss(log_ratio_w, log_ratio_l, beta=0.1):
 
 ### One-Line Memory
 
-> For good samples, push up `log_ratio`; for bad samples, push it down. Each side goes through a sigmoid.
+> No pairing needed. Push good samples up, push bad samples down; each goes through its own sigmoid.
 
 KTO does not require chosen/rejected pairs. You only need to know whether a single sample is desirable or undesirable.
 
 ### Pseudocode
 
 ```
+# Step 1: for a single sample, compute the "current vs reference" log ratio
 log_ratio = log_pi(y|x) - log_pi_ref(y|x)
 
-# desirable: increase log_ratio
+# Step 2: good samples -> push log_ratio up (above the baseline z_ref)
 loss_desirable = -log_sigmoid(beta * (log_ratio - z_ref))
 
-# undesirable: decrease log_ratio
+# Step 3: bad samples -> push log_ratio down (below the baseline)
 loss_undesirable = -log_sigmoid(-beta * (log_ratio - z_ref))
 
+# Step 4: weighted sum over both classes
 loss = w_desirable * loss_desirable + w_undesirable * loss_undesirable
 ```
 
@@ -201,14 +206,16 @@ def kto_loss(log_ratio, is_desirable, z_ref=0.0, beta=0.1):
 
 ### One-Line Memory
 
-> Drop the reference model from DPO. Use length-normalized log-probability plus an implicit reward offset `gamma`.
+> DPO without a reference model. Divide log-prob by answer length, then subtract an offset gamma.
 
 ### Pseudocode
 
 ```
-logp_w = log_pi(chosen) / len(chosen)     # length-normalized
+# Step 1: divide log-prob by answer length (so long answers aren't penalized)
+logp_w = log_pi(chosen) / len(chosen)
 logp_l = log_pi(rejected) / len(rejected)
 
+# Step 2: good minus bad, scale by beta, then subtract a margin gamma
 loss = -log_sigmoid(beta * (logp_w - logp_l) - gamma)
 ```
 

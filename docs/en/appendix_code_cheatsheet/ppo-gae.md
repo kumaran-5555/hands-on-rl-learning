@@ -95,7 +95,7 @@ def compute_gae(rewards, values, dones, gamma=0.99, lam=0.95):
 
 ### One-Line Memory
 
-> New policy / old policy = ratio. Ratio * advantage = target. If the ratio leaves the allowed band, clip it; take the smaller target.
+> New policy / old policy = ratio. Ratio \* advantage = target. If the ratio leaves the allowed band, clip it; take the smaller target.
 
 $$L^{CLIP} = -\min\big(r_t(\theta) \cdot A_t,\;\text{clip}(r_t(\theta), 1-\epsilon, 1+\epsilon) \cdot A_t\big)$$
 

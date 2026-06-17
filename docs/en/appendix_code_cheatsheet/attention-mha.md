@@ -12,7 +12,7 @@ Strictly speaking, this is not an RL algorithm. But it is one of the top three m
 
 ### One-Line Memory
 
-> Compute $QK^T$, divide by $\sqrt{d_k}$, apply mask, softmax, then multiply by $V$.
+> Score Q against K, divide by the square root, mask the future, softmax, then multiply by V.
 
 $$\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V$$
 
@@ -26,9 +26,16 @@ $$\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)
 ### Pseudocode
 
 ```
+# Step 1: dot product of Q and K scores how similar each Q is to each K; divide by sqrt(d_k) to keep numbers tame
 scores = Q @ K^T / sqrt(d_k)
-scores = scores + mask    # causal: upper triangle -> -inf
+
+# Step 2: add the mask to push "future" positions to -inf (a language model can only look left)
+scores = scores + mask
+
+# Step 3: softmax turns scores into weights that sum to 1
 attn_weights = softmax(scores, dim=-1)
+
+# Step 4: weight V by these attention weights to get the output
 output = attn_weights @ V
 ```
 
@@ -101,23 +108,26 @@ def causal_mask(seq_len):
 
 ### One-Line Memory
 
-> Split `d_model` into `h` heads. Each head runs attention independently, then concatenate and apply an output projection.
+> Slice the total dimension into h slices; each slice runs attention on its own; finally concat them back and pass through a linear layer.
 
 ### Pseudocode
 
 ```
-Q = x @ W_Q   # [B, seq, d_model] -> [B, seq, d_model]
+# Step 1: pass x through three linear layers to get Q, K, V (each still [B, seq, d_model])
+Q = x @ W_Q
 K = x @ W_K
 V = x @ W_V
 
-# split heads: [B, seq, d_model] -> [B, heads, seq, d_k]
+# Step 2: split the last dim d_model into h heads
+#   [B, seq, d_model] -> [B, heads, seq, d_k]
 Q = Q.view(B, seq, heads, d_k).transpose(1, 2)
 K = K.view(B, seq, heads, d_k).transpose(1, 2)
 V = V.view(B, seq, heads, d_k).transpose(1, 2)
 
+# Step 3: each head does its own attention in parallel
 attn_out = scaled_dot_product_attention(Q, K, V, mask)
 
-# merge heads: [B, heads, seq, d_k] -> [B, seq, d_model]
+# Step 4: glue the heads back into d_model, then apply the output linear layer
 attn_out = attn_out.transpose(1, 2).contiguous().view(B, seq, d_model)
 output = attn_out @ W_O
 ```
@@ -176,8 +186,8 @@ class MultiHeadAttention(nn.Module):
 
 ### One-Line Memory
 
-- **MQA**: all Q heads share a single K/V head. Best for KV cache, may lose expressiveness.
-- **GQA**: split Q heads into `g` groups; heads within a group share K/V. A compromise between MHA and MQA.
+- **MQA**: all Q heads share the same set of K/V. Smallest memory footprint, but the model can get dumber.
+- **GQA**: split the Q heads into groups; each group shares one set of K/V. Saves memory without dumbing it down too much.
 
 ### PyTorch Implementation (GQA)
 

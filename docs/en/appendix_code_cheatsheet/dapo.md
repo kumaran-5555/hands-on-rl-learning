@@ -22,19 +22,21 @@ DAPO (Decoupled Clip and Dynamic Sampling Policy Optimization) is a GRPO improve
 
 ### One-Line Memory
 
-> For positive advantages, clip only the upper bound (do not be greedy). For negative advantages, clip only the lower bound (do not be vengeful). GRPO clips both sides; DAPO clips only one side per sign.
+> Don't be greedy on the good, don't be vengeful on the bad: positive advantages clip the upper bound only, negative advantages clip the lower bound only.
 
 ### Pseudocode
 
 ```
+# Step 1: compute the new/old policy ratio
 ratio = exp(new_logp - old_logp)
 
-# positive advantage: encourage improvement, but clip the upper bound
-pos_surr = min(ratio, 1 + eps) * advantage      # advantage > 0
+# Step 2: positive advantage — clip only the upper bound (don't let the ratio run too high)
+pos_surr = min(ratio, 1 + eps) * advantage    # advantage > 0
 
-# negative advantage: allow recovery, but clip the lower bound
-neg_surr = max(ratio, 1 - eps) * advantage      # advantage < 0
+# Step 3: negative advantage — clip only the lower bound (let the ratio bounce back)
+neg_surr = max(ratio, 1 - eps) * advantage    # advantage < 0
 
+# Step 4: combine and average
 loss = -mean(pos_surr + neg_surr)
 ```
 
@@ -126,13 +128,17 @@ def dapo_policy_loss(new_logps, old_logps, advantages, clip_high=0.28, clip_low=
 
 ### One-Line Memory
 
-> If all $G$ completions for the same prompt get the same reward (all correct or all wrong), skip that prompt: there is no learning signal.
+> If a whole group of answers is all-correct or all-wrong, there is nothing to compare, so skip that question.
 
 ### Pseudocode
 
 ```
+# Walk every prompt one at a time
 for each prompt:
+    # score each completion under this prompt
     rewards = [get_reward(completion) for completion in group]
+
+    # if every reward is identical (all right or all wrong) there is no signal -> skip
     if all rewards are the same:
         skip this prompt
 ```
@@ -162,13 +168,16 @@ GRPO uses group-wise z-score normalization. If all rewards in a group are identi
 
 ### One-Line Memory
 
-> Overlong responses are not cut to zero in one shot. Penalize linearly by the amount of overflow.
+> Don't zero out overlong answers all at once — deduct gradually based on how much they overflow.
 
 ### Pseudocode
 
 ```
+# Step 1: only penalize responses that exceed the max length
 if response_length > max_length:
+    # Step 2: the more it overflows, the more we deduct (proportional to the overflow)
     penalty_ratio = (response_length - max_length) / max_length
+    # Step 3: subtract from the original reward
     reward = reward - penalty_weight * penalty_ratio
 ```
 
