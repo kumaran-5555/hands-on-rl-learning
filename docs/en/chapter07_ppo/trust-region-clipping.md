@@ -55,7 +55,7 @@ $$\mathbb{E}_{a \sim \pi_{\text{old}}} \left[ \frac{\pi_\theta(a \mid s)}{\pi_{\
 
 This ratio $r_t(\theta) = \frac{\pi_\theta(a_t \mid s_t)}{\pi_{\text{old}}(a_t \mid s_t)}$ is called the **policy ratio** — it measures the change in probability that the new policy assigns to the same $(s,a)$ relative to the old.
 
-Substituting the example:
+In the running example:
 
 | Policy                        | $\pi(a_1 \mid s)$ |
 | ----------------------------- | ----------------- |
@@ -87,7 +87,7 @@ $$D_{\text{KL}}(P \| Q) = \sum_i P(i) \log \frac{P(i)}{Q(i)}$$
 
 When the two distributions are identical, $D_{\text{KL}} = 0$; the greater the difference, the larger $D_{\text{KL}}$ (always non-negative). Here $\pi_{\text{old}}$ is the policy before the update and $\pi_\theta$ is the policy after, so $D_{\text{KL}}(\pi_{\text{old}} \| \pi_\theta)$ measures how much a single update changes the policy distribution. The constraint requires this change to not exceed $\delta$.
 
-Substituting the running example. With $\pi_{\text{old}}(a_1) = 0.6$ and $\pi_\theta(a_1) = 0.99$:
+Returning to the running example. With $\pi_{\text{old}}(a_1) = 0.6$ and $\pi_\theta(a_1) = 0.99$:
 
 $$D_{\text{KL}}(\pi_{\text{old}} \| \pi_\theta) = 0.6 \ln\frac{0.6}{0.99} + 0.4 \ln\frac{0.4}{0.01} \approx 0.6 \times (-0.50) + 0.4 \times 3.69 \approx 1.18$$
 
@@ -107,7 +107,7 @@ PPO's objective:
 
 $$L^{\text{CLIP}}(\theta) = \mathbb{E}_t \left[ \min \left( r_t(\theta) \cdot A_t, \; \text{clip}(r_t(\theta), 1-\varepsilon, 1+\varepsilon) \cdot A_t \right) \right]$$
 
-Substituting the 1.65 example from above ($\varepsilon = 0.2$, $A_t = 2$):
+Using the 1.65 example from above ($\varepsilon = 0.2$, $A_t = 2$):
 
 | Term         | Computation                                          | Value      |
 | ------------ | ---------------------------------------------------- | ---------- |

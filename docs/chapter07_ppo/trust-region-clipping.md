@@ -51,7 +51,7 @@ $$\mathbb{E}_{a \sim \pi_{\text{old}}} \left[ \frac{\pi_\theta(a\mid s)}{\pi_{\t
 
 该比值 $r_t(\theta) = \frac{\pi_\theta(a_t\mid s_t)}{\pi_{\text{old}}(a_t\mid s_t)}$ 称为**策略比率**（Policy Ratio），衡量新策略相对于旧策略在同一 $(s,a)$ 上的概率变化。
 
-代入示例：
+看那个例子：
 
 | 策略                       | $\pi(a_1\mid s)$ |
 | -------------------------- | ---------------- |
@@ -83,7 +83,7 @@ $$D_{\text{KL}}(P \| Q) = \sum_i P(i) \log \frac{P(i)}{Q(i)}$$
 
 当两个分布完全相同时，$D_{\text{KL}} = 0$；差异越大，$D_{\text{KL}}$ 越大（始终非负）。式中 $\pi_{\text{old}}$ 为更新前的旧策略，$\pi_\theta$ 为更新后的新策略，因此 $D_{\text{KL}}(\pi_{\text{old}} \| \pi_\theta)$ 衡量一次更新使策略分布改变的程度。约束条件要求这一改变量不超过 $\delta$。
 
-代入微型示例。$\pi_{\text{old}}(a_1) = 0.6$，$\pi_\theta(a_1) = 0.99$，则：
+回到那个微型示例。$\pi_{\text{old}}(a_1) = 0.6$，$\pi_\theta(a_1) = 0.99$，则：
 
 $$D_{\text{KL}}(\pi_{\text{old}} \| \pi_\theta) = 0.6 \ln\frac{0.6}{0.99} + 0.4 \ln\frac{0.4}{0.01} \approx 0.6 \times (-0.50) + 0.4 \times 3.69 \approx 1.18$$
 
@@ -103,7 +103,7 @@ PPO 的目标函数：
 
 $$L^{\text{CLIP}}(\theta) = \mathbb{E}_t \left[ \min \left( r_t(\theta) \cdot A_t, \; \text{clip}(r_t(\theta), 1-\varepsilon, 1+\varepsilon) \cdot A_t \right) \right]$$
 
-将前文的 1.65 例子代入（取 $\varepsilon = 0.2$、$A_t = 2$）：
+用前文的 1.65 例子计算（取 $\varepsilon = 0.2$、$A_t = 2$）：
 
 | 项        | 计算                                                 | 值         |
 | --------- | ---------------------------------------------------- | ---------- |
