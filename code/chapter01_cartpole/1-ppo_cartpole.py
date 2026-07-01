@@ -1,21 +1,21 @@
 """
-第1章：使用 Stable-Baselines3 的 PPO 训练 CartPole
+Chapter 1: Training CartPole with PPO from Stable-Baselines3
 
-训练过程通过 SwanLab 记录指标（奖励曲线、损失等），
-训练结束后可选弹出 GUI 窗口展示学习成果。
+Metrics during training (reward curve, losses, etc.) are logged via SwanLab.
+After training, optionally pop up a GUI window to showcase the learned results.
 
-运行方式：
-    # 默认：训练 + SwanLab 曲线（不开 GUI，速度快）
+Usage:
+    # Default: train + SwanLab curves (no GUI, faster)
     python 1-ppo_cartpole.py
 
-    # 打开 GUI 演示（训练完弹出小车动画窗口）
+    # Open the GUI demo (pops up the cart animation window after training)
     python 1-ppo_cartpole.py --gui
 
-关于 --gui 参数：
-    训练阶段始终是 headless（无渲染），速度不受 GUI 影响。
-    --gui 只控制训练结束后的演示环节是否弹出 CartPole 动画窗口。
-    开启 GUI 时，演示环节每帧需要等待屏幕刷新（~16ms），会明显变慢；
-    关闭 GUI 时，演示环节纯计算，几秒内跑完。
+About the --gui flag:
+    The training phase is always headless (no rendering); speed is unaffected by the GUI.
+    --gui only controls whether the post-training demo pops up the CartPole animation window.
+    With the GUI on, each demo frame waits for the screen refresh (~16ms), noticeably slower;
+    with the GUI off, the demo is pure computation and finishes within seconds.
 """
 
 import argparse
@@ -32,23 +32,23 @@ import swanlab
 
 
 class LogApproxKL(BaseCallback):
-    """补录 train/approx_kl 到 SwanLab。
+    """Backfill train/approx_kl to SwanLab.
 
-    SB3 的 PPO.train() 内部通过 logger.record("train/approx_kl", ...) 记录了该指标，
-    但值为 numpy.float32 类型。SwanLab 的 SB3 回调在 write() 中使用
-    isinstance(value, (int, float)) 做类型检查，而 numpy.float32 不通过该检查
-    （numpy.float64 和 Python float 可以通过），导致 approx_kl 被静默跳过。
+    SB3's PPO.train() records this metric internally via logger.record("train/approx_kl", ...),
+    but the value is of type numpy.float32. SwanLab's SB3 callback uses
+    isinstance(value, (int, float)) as a type check in write(), and numpy.float32 fails it
+    (numpy.float64 and Python float pass), so approx_kl gets silently skipped.
 
-    本回调在每次 train() 执行完毕后，从 logger 缓存中取出 approx_kl 值，
-    转为 Python float 后直接通过 swanlab.log 补录。
+    After each train() call, this callback pulls the approx_kl value from the logger cache,
+    converts it to a Python float, and backfills it directly via swanlab.log.
     """
 
     def _on_step(self) -> bool:
         return True
 
     def _on_rollout_end(self) -> None:
-        # train() 已在 _on_rollout_end 触发前执行完毕，
-        # logger 缓存中包含本轮 train 的所有指标。
+        # train() has already finished before _on_rollout_end fires;
+        # the logger cache holds all metrics from this round of train.
         logger = self.model.logger
         if hasattr(logger, "name_to_value") and "train/approx_kl" in logger.name_to_value:
             value = float(logger.name_to_value["train/approx_kl"])
@@ -56,21 +56,22 @@ class LogApproxKL(BaseCallback):
 
 
 class RestoreStdoutLog(BaseCallback):
-    """把 SB3 往终端打印的滚动日志表格加回来。
+    """Add back the scrolling log table that SB3 prints to the terminal.
 
-    SwanLabCallback._init_callback() 内部会调用 self.model.set_logger(...)，
-    用一个"只写 SwanLab"的 logger 整体替换掉 SB3 默认 logger，
-    顺带删掉了负责往 stdout 打印 ep_rew_mean / fps / approx_kl 表格的
-    HumanOutputFormat（即 verbose=1 的滚动日志）。
+    SwanLabCallback._init_callback() internally calls self.model.set_logger(...),
+    replacing SB3's default logger entirely with a "SwanLab-only" logger, which also
+    removes the HumanOutputFormat responsible for printing the ep_rew_mean / fps /
+    approx_kl table to stdout (i.e. the scrolling log at verbose=1).
 
-    本回调在 _init_callback 阶段执行（此时 SwanLabCallback 已替换完 logger），
-    向当前 logger 补回一个 stdout 输出端，于是终端重新滚动打印，
-    同时 SwanLab 记录不受影响。需放在 callback 列表中 SwanLabCallback 之后。
+    This callback runs during the _init_callback phase (after SwanLabCallback has
+    replaced the logger), adding a stdout output back to the current logger, so the
+    terminal scrolls and prints again while SwanLab logging is unaffected. It must be
+    placed after SwanLabCallback in the callback list.
     """
 
     def _init_callback(self) -> None:
-        # SwanLabCallback 已把 logger 换成只含 SwanLabOutputFormat，
-        # 这里补回一个 stdout 输出端，即可恢复 verbose=1 的滚动表格。
+        # SwanLabCallback has swapped the logger to contain only SwanLabOutputFormat;
+        # add a stdout output back here to restore the verbose=1 scrolling table.
         self.model.logger.output_formats.append(HumanOutputFormat(sys.stdout))
 
     def _on_step(self) -> bool:
@@ -91,11 +92,11 @@ def main():
     os.makedirs("output", exist_ok=True)
 
     # ==========================================
-    # 第一阶段：训练
+    # Phase 1: Training
     # ==========================================
     env = gym.make("CartPole-v1")
 
-    # 打印环境信息（状态空间、动作空间、边界阈值）
+    # Print environment info (state space, action space, boundary thresholds)
     print("=" * 50)
     print("CartPole-v1 环境信息")
     print("=" * 50)
@@ -121,15 +122,15 @@ def main():
         callback=[swanlab_cb, RestoreStdoutLog(), LogApproxKL()],
     )
 
-    # 评估
-    mean_reward, std_reward = evaluate_policy(model, env, n_eval_episodes=10)
+    # Evaluate
+    mean_reward, std_reward = evaluate_policy
     print(f"训练完成！平均奖励: {mean_reward} +/- {std_reward}")
 
     model.save("output/ppo_cartpole")
     env.close()
 
     # ==========================================
-    # 第二阶段：演示学习成果
+    # Phase 2: Demonstrate the learned results
     # ==========================================
     print("\n正在展示智能体的学习成果...")
     render_mode = "human" if args.gui else None

@@ -1,0 +1,26 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "PPO CartPole (train)",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/code/chapter01_cartpole/2-pytorch_ppo.py",
+      "cwd": "${workspaceFolder}/code/chapter01_cartpole",
+      "python": "${workspaceFolder}/rl-course/bin/python",
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
+      "name": "PPO CartPole (train + GUI)",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/code/chapter01_cartpole/2-pytorch_ppo.py",
+      "cwd": "${workspaceFolder}/code/chapter01_cartpole",
+      "python": "${workspaceFolder}/rl-course/bin/python",
+      "args": ["--gui"],
+      "console": "integratedTerminal",
+      "justMyCode": false
+    }
+  ]
+}
