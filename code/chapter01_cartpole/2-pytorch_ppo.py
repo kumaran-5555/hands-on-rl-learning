@@ -355,6 +355,251 @@ def ppo_update(
     }
 
 
+
+
+# ==========================================
+# Part 2: Collect trajectories (Rollout)
+# ==========================================
+def collect_rollout_2(model, env, num_steps=2048):
+    """
+    Collect trajectories and output the following for each step
+    
+    ** observation and action taken **
+    - observation
+    - action taken 
+    - value estimate of the state    
+    - log probability of the action
+
+    ** feedback from the environment **
+    - reward received
+    - next observation (only if truncated but not terminated)
+    - terminated (pole fell): V(s')=0
+    - truncated (reached step limit): V(s') needs bootstrap
+
+    ** bootstrap value **
+    - bootstarp value [if the rollout steps ended but the last step is not truncted or terminated]
+
+    """
+
+    
+    obs, _ = env.reset()
+
+    rollout_data = []
+    last_step_bootstrap_value = None
+
+    for step in range(num_steps):
+        obs = torch.FloatTensor(obs)
+        with torch.no_grad():
+            action, log_prob, value = model.get_action(obs) 
+
+        next_obs, reward, terminated, truncated, info = env.step(action.item())
+        rollout_data.append({
+            "obs": obs,
+            "action": action.item(),
+            "log_prob": log_prob.item(),
+            "value": value.item(),
+            "reward": reward,
+            "next_obs": next_obs if not (terminated or truncated) else None,
+            "terminated": terminated,
+            "truncated": truncated,
+        })
+
+        if terminated or truncated:            
+            # there is no next observation to bootstrap from if the episode ended            
+            next_obs, _ = env.reset()  # reset the environment for the next episode
+
+        
+        obs = next_obs
+
+    # If the rollout ended but the last step is not truncated or terminated, we need to bootstrap
+    if not terminated and not truncated:
+        with torch.no_grad():
+            obs = torch.FloatTensor(obs)
+            _,_, last_step_bootstrap_value = model.get_action(obs)
+    
+    return rollout_data, last_step_bootstrap_value
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+# ==========================================
+# Part 3: Compute GAE advantages
+# ==========================================
+def compute_gae_2(model, rollout_data, last_step_bootstrap_value, gamma=0.99, lam=0.95):
+    """
+    Compute GAE advantages. 
+    Return 
+    - advantages for each step
+    - returns for each step (reward + value of the next state)    
+
+    - Avantages are computed as: 
+        - (reward + expected value of state t+1  - expected value of state t)
+        - expected future value is discounted by gamma and lam
+
+    - Returns are computed as:
+        - (reward + expected value of state t+1)
+        - expected future value is discounted by gamma
+    """
+
+    deltas = []
+    
+
+    
+    # simple forward loop to compute delta for each step
+
+    for i in range(len(rollout_data)):
+        data = rollout_data[i]
+        
+
+        
+        if data["terminated"]:
+            # no future value since this is a terminal state
+            # advantage becomes just delta
+            delta = data["reward"] - data["value"]
+            
+            
+        elif data["truncated"]:
+            # no future value since this is a terminal state
+            # advantage becomes just delta         
+            delta = data["reward"] - data["value"]
+            
+        else:
+            if i < len(rollout_data) - 1:
+                # value of state t+1 is the value of the next step in the rollout or the bootstrap value if this is the last step
+                next_value = rollout_data[i+1]["value"]
+            else:
+                next_value = last_step_bootstrap_value
+        
+            delta = data["reward"] + gamma * next_value - data["value"]
+
+        deltas.append(delta)
+
+    advantages = [None] * len(deltas)
+    returns = [None] * len(deltas)
+
+    gae = 0
+    for i in reversed(range(len(rollout_data))):
+        data = rollout_data[i]
+        if data['terminated'] or data['truncated']:
+            # no backpropagation is needed at the terminal states
+            advantages[i] = deltas[i]
+            gae = deltas[i]
+        else:
+            # gae = current steps error + discounted future gae
+            # there are two discounting factors 
+            # gamma - discounts all future 
+            # lambda - controls smoothing of current advantage with future. gae_t = (delta_t + lambda * delta_t+1 + lambda**2 * delta_t+2)
+            gae = deltas[i] + gamma * lam * gae # we are doing it in reverse, gae on right will refer to next step in trajectory
+
+        advantages[i] = gae
+        # actual return can be derived from advantage: 
+        # gae = reward_t + value_t+1 - value_t
+        # return_t = reward_t + value_t+1
+        # return_t = gae + value_t
+
+        returns[i] = gae + data["value"] 
+
+    advantages = torch.FloatTensor(advantages)
+    advantages_norm = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
+    returns = torch.FloatTensor(returns)
+
+
+    return advantages, returns
+
+
+
+
+
+
+# ==========================================
+# Part 4: PPO update
+# ==========================================
+def ppo_update_2(
+    model,
+    optimizer,
+    transitions,
+    advantages,
+    returns,
+    clip_eps=0.2,
+    epochs=10,
+    batch_size=64,
+):
+    """PPO clipped-objective update"""
+
+    total_policy_loss = 0
+    total_value_loss = 0
+    n_updates = 0
+
+    # convert to arrays for batch level sampling
+    obs = torch.FloatTensor(np.array([t["obs"] for t in transitions]))
+    actions = torch.LongTensor(np.array([t["action"] for t in transitions]))
+    old_log_probs = torch.FloatTensor(np.array([t["log_prob"] for t in transitions]))
+
+    for e in range(epochs):
+        # sample a batch 
+        indices = np.random.permutation(len(transitions))
+        for start in range(0, len(indices), batch_size):
+            idx = indices[start:start+batch_size]
+            batch_obs = obs[idx]
+            batch_actions = actions[idx]
+            batch_old_log_prob = old_log_probs[idx]
+            batch_advantages = advantages[idx]
+            batch_returns = returns[idx]
+
+
+            # compute new log probability from updated model 
+
+            logits, values = model(batch_obs) # call forward
+            dist = torch.distributions.Categorical(logits=logits)
+            new_log_prob = dist.log_prob(batch_actions)
+
+            # PPO clipped objective: ratio = new_prob / old_prob
+            # adjust ratio in the direction of advantage till clipped threshold
+            # if advantage > 0, maximize the ratio till clip (increase abs ppo_loss)
+            # if advantage < 0, mimimize the ratio till clip (decrease abs ppo_loss)
+            ratio = torch.exp(new_log_prob - batch_old_log_prob)
+            clipped_ratio = torch.clamp(ratio, 1 - clip_eps, 1 + clip_eps)
+            policy_loss = -torch.min(ratio * batch_advantages, clipped_ratio * batch_advantages).mean()
+            
+            # value regression loss against return value
+            value_loss = ((values - batch_returns) ** 2).mean()
+
+            # total loss = ppo loss + value loss
+            loss = policy_loss + 0.5 * value_loss
+
+            # backpropagate and update model parameters
+            optimizer.zero_grad()
+            loss.backward()
+            nn.utils.clip_grad_norm_(model.parameters(), 0.5)
+            optimizer.step()
+
+            total_policy_loss += policy_loss.item()
+            total_value_loss += value_loss.item()            
+            n_updates += 1
+
+    return {
+        "policy_loss": total_policy_loss / n_updates,
+        "value_loss": total_value_loss / n_updates        
+    }
+
+
+
+
+
+
 # ==========================================
 # Part 5: Training loop
 # ==========================================
@@ -420,7 +665,7 @@ def train():
 
     for iteration in range(total_iterations):
         # Collect data
-        transitions, last_bootstrap = collect_rollout(model, env, steps_per_rollout)
+        transitions, last_bootstrap = collect_rollout_2(model, env, steps_per_rollout)
 
         total_timesteps += len(transitions)
 
@@ -439,12 +684,12 @@ def train():
                 ep_length = 0
 
         # Compute advantages
-        advantages, returns, advantages_orig = compute_gae(model, transitions, last_bootstrap)
-        advantages_2, returns_2 = compute_gae_2(model, transitions, last_bootstrap)
+        advantages, returns = compute_gae_2(model, transitions, last_bootstrap)
+        # test code advantages_2, returns_2 = compute_gae_2(model, transitions, last_bootstrap)
 
         # PPO update
         metrics = ppo_update(model, optimizer, transitions, advantages, returns)
-
+        
         # Explained variance (re-predict with the updated Critic, matching SB3)
         with torch.no_grad():
             obs_tensor = torch.FloatTensor(np.array([t["obs"] for t in transitions]))

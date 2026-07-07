@@ -74,7 +74,7 @@ class ActorCritic(nn.Module):
 # ==========================================
 # Part 2: Collect trajectories (Rollout)
 # ==========================================
-def collect_rollout(model, env, num_steps=2048):
+def collect_rollout_2(model, env, num_steps=2048):
     """
     Collect trajectories and output the following for each step
     
@@ -95,8 +95,7 @@ def collect_rollout(model, env, num_steps=2048):
 
     """
 
-    print(f"Collecting rollout for {num_steps} steps...")
-
+    
     obs, _ = env.reset()
 
     rollout_data = []
@@ -132,7 +131,6 @@ def collect_rollout(model, env, num_steps=2048):
             obs = torch.FloatTensor(obs)
             _,_, last_step_bootstrap_value = model.get_action(obs)
     
-    print(f"Rollout collection completed. Collected {len(rollout_data)} steps.")
     return rollout_data, last_step_bootstrap_value
             
 
@@ -154,7 +152,7 @@ def collect_rollout(model, env, num_steps=2048):
 # ==========================================
 # Part 3: Compute GAE advantages
 # ==========================================
-def compute_gae(model, rollout_data, last_step_bootstrap_value, gamma=0.99, lam=0.95):
+def compute_gae_2(model, rollout_data, last_step_bootstrap_value, gamma=0.99, lam=0.95):
     """
     Compute GAE advantages. 
     Return 
@@ -228,7 +226,13 @@ def compute_gae(model, rollout_data, last_step_bootstrap_value, gamma=0.99, lam=
 
         returns[i] = gae + data["value"] 
 
+    advantages = torch.FloatTensor(advantages)
+    advantages_norm = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
+    returns = torch.FloatTensor(returns)
+
+
     return advantages, returns
+
 
 
 
@@ -237,7 +241,7 @@ def compute_gae(model, rollout_data, last_step_bootstrap_value, gamma=0.99, lam=
 # ==========================================
 # Part 4: PPO update
 # ==========================================
-def ppo_update(
+def ppo_update_2(
     model,
     optimizer,
     transitions,
@@ -248,7 +252,71 @@ def ppo_update(
     batch_size=64,
 ):
     """PPO clipped-objective update"""
-    pass
+
+    total_policy_loss = 0
+    total_value_loss = 0
+    n_updates = 0
+
+    # convert to arrays for batch level sampling
+    obs = torch.FloatTensor(np.array([t["obs"] for t in transitions]))
+    actions = torch.LongTensor(np.array([t["action"] for t in transitions]))
+    old_log_probs = torch.FloatTensor(np.array([t["log_prob"] for t in transitions]))
+
+    for e in range(epochs):
+        # sample a batch 
+        indices = np.random.permutation(len(transitions))
+        for start in range(0, len(indices), batch_size):
+            idx = indices[start:start+batch_size]
+            batch_obs = obs[idx]
+            batch_actions = actions[idx]
+            batch_old_log_prob = old_log_probs[idx]
+            batch_advantages = advantages[idx]
+            batch_returns = returns[idx]
+
+
+            # compute new log probability from updated model 
+
+            logits, values = model(batch_obs) # call forward
+            dist = torch.distributions.Categorical(logits=logits)
+            new_log_prob = dist.log_prob(batch_actions)
+
+            # PPO clipped objective: ratio = new_prob / old_prob
+            # adjust ratio in the direction of advantage till clipped threshold
+            # if advantage > 0, maximize the ratio till clip (increase abs ppo_loss)
+            # if advantage < 0, mimimize the ratio till clip (decrease abs ppo_loss)
+            ratio = torch.exp(new_log_prob - batch_old_log_prob)
+            clipped_ratio = torch.clamp(ratio, 1 - clip_eps, 1 + clip_eps)
+            policy_loss = -torch.min(ratio * batch_advantages, clipped_ratio * batch_advantages).mean()
+            
+            # value regression loss against return value
+            value_loss = ((values - batch_returns) ** 2).mean()
+
+            # total loss = ppo loss + value loss
+            loss = policy_loss + 0.5 * value_loss
+
+            # backpropagate and update model parameters
+            optimizer.zero_grad()
+            loss.backward()
+            nn.utils.clip_grad_norm_(model.parameters(), 0.5)
+            optimizer.step()
+
+            total_policy_loss += policy_loss.item()
+            total_value_loss += value_loss.item()            
+            n_updates += 1
+
+    return {
+        "policy_loss": total_policy_loss / n_updates,
+        "value_loss": total_value_loss / n_updates        
+    }
+
+
+
+
+
+
+
+
+
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -277,8 +345,42 @@ def train():
     print("Observation high:", env.observation_space.high)
     print("Observation low:", env.observation_space.low)
 
-    for i in range(2):
-        rollout_data, last_step_bootstrap_value = collect_rollout(model, env, num_steps=2048)
+    total_iterations = 40
+    steps_per_rollout = 2048
+
+
+    for i in range(total_iterations):
+        rollout_data, last_step_bootstrap_value = collect_rollout_2(model, env, num_steps=steps_per_rollout)
+
+
+
+
+
+        advantages, returns = compute_gae_2(model, rollout_data, last_step_bootstrap_value)
+        metrics = ppo_update_2(model, optimizer, rollout_data, advantages, returns)
+       
+
+        # Compute episode rewards and lengths
+        ep_rewards = []
+        ep_lengths = []
+        ep_reward = 0
+        ep_length = 0
+        for t in rollout_data:
+            ep_reward += t["reward"]
+            ep_length += 1
+            if t["terminated"] or t["truncated"]:
+                ep_rewards.append(ep_reward)
+                ep_lengths.append(ep_length)
+                ep_reward = 0
+                ep_length = 0
+
+
+        print(f"Iteration {i+1}/{total_iterations}: Policy Loss = {metrics['policy_loss']:.4f}, Value Loss = {metrics['value_loss']:.4f} : Episode Reward = {np.mean(ep_rewards):.2f}, Episode Length = {np.mean(ep_lengths):.2f}")
+
+        
+
+
+
 
 
         
