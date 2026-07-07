@@ -110,9 +110,9 @@ def collect_rollout(model, env, num_steps=2048):
         next_obs, reward, terminated, truncated, info = env.step(action.item())
         rollout_data.append({
             "obs": obs,
-            "action": action,
-            "log_prob": log_prob,
-            "value": value,
+            "action": action.item(),
+            "log_prob": log_prob.item(),
+            "value": value.item(),
             "reward": reward,
             "next_obs": next_obs if not (terminated or truncated) else None,
             "terminated": terminated,
@@ -154,14 +154,84 @@ def collect_rollout(model, env, num_steps=2048):
 # ==========================================
 # Part 3: Compute GAE advantages
 # ==========================================
-def compute_gae(model, transitions, last_bootstrap, gamma=0.99, lam=0.95):
+def compute_gae(model, rollout_data, last_step_bootstrap_value, gamma=0.99, lam=0.95):
     """
-    Generalized Advantage Estimation, correctly handling:
-    - terminated (truly done): don't propagate GAE, V(s')=0
-    - truncated (time cutoff): don't propagate GAE, but use V(next_obs) as bootstrap
-    - normal step: propagate GAE normally
+    Compute GAE advantages. 
+    Return 
+    - advantages for each step
+    - returns for each step (reward + value of the next state)    
+
+    - Avantages are computed as: 
+        - (reward + expected value of state t+1  - expected value of state t)
+        - expected future value is discounted by gamma and lam
+
+    - Returns are computed as:
+        - (reward + expected value of state t+1)
+        - expected future value is discounted by gamma
     """
-    pass
+
+    deltas = []
+    
+
+    
+    # simple forward loop to compute delta for each step
+
+    for i in range(len(rollout_data)):
+        data = rollout_data[i]
+        
+
+        
+        if data["terminated"]:
+            # no future value since this is a terminal state
+            # advantage becomes just delta
+            delta = data["reward"] - data["value"]
+            
+            
+        elif data["truncated"]:
+            # no future value since this is a terminal state
+            # advantage becomes just delta         
+            delta = data["reward"] - data["value"]
+            
+        else:
+            if i < len(rollout_data) - 1:
+                # value of state t+1 is the value of the next step in the rollout or the bootstrap value if this is the last step
+                next_value = rollout_data[i+1]["value"]
+            else:
+                next_value = last_step_bootstrap_value
+        
+            delta = data["reward"] + gamma * next_value - data["value"]
+
+        deltas.append(delta)
+
+    advantages = [None] * len(deltas)
+    returns = [None] * len(deltas)
+
+    gae = 0
+    for i in reversed(range(len(rollout_data))):
+        data = rollout_data[i]
+        if data['terminated'] or data['truncated']:
+            # no backpropagation is needed at the terminal states
+            advantages[i] = deltas[i]
+            gae = deltas[i]
+        else:
+            # gae = current steps error + discounted future gae
+            # there are two discounting factors 
+            # gamma - discounts all future 
+            # lambda - controls smoothing of current advantage with future. gae_t = (delta_t + lambda * delta_t+1 + lambda**2 * delta_t+2)
+            gae = deltas[i] + gamma * lam * gae # we are doing it in reverse, gae on right will refer to next step in trajectory
+
+        advantages[i] = gae
+        # actual return can be derived from advantage: 
+        # gae = reward_t + value_t+1 - value_t
+        # return_t = reward_t + value_t+1
+        # return_t = gae + value_t
+
+        returns[i] = gae + data["value"] 
+
+    return advantages, returns
+
+
+
 
 
 # ==========================================
@@ -208,7 +278,9 @@ def train():
     print("Observation low:", env.observation_space.low)
 
     for i in range(2):
-        rollout_data, last_bootstrap = collect_rollout(model, env, num_steps=2048)
+        rollout_data, last_step_bootstrap_value = collect_rollout(model, env, num_steps=2048)
+
+
         
     
 

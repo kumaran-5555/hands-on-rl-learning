@@ -187,7 +187,85 @@ def compute_gae(model, transitions, last_bootstrap, gamma=0.99, lam=0.95):
 
     advantages = torch.FloatTensor(advantages)
     returns = advantages + torch.FloatTensor(values)
-    advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
+    advantages_norm = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
+
+    return advantages_norm, returns, advantages
+
+
+
+def compute_gae_2(model, rollout_data, last_step_bootstrap_value, gamma=0.99, lam=0.95):
+    """
+    Compute GAE advantages. 
+    Return 
+    - advantages for each step
+    - returns for each step (reward + value of the next state)    
+
+    - Avantages are computed as: 
+        - (reward + expected value of state t+1  - expected value of state t)
+        - expected future value is discounted by gamma and lam
+
+    - Returns are computed as:
+        - (reward + expected value of state t+1)
+        - expected future value is discounted by gamma
+    """
+
+    deltas = []
+    
+
+    
+    # simple forward loop to compute delta for each step
+
+    for i in range(len(rollout_data)):
+        data = rollout_data[i]
+        
+
+        
+        if data["terminated"]:
+            # no future value since this is a terminal state
+            # advantage becomes just delta
+            delta = data["reward"] - data["value"]
+            
+            
+        elif data["truncated"]:
+            # no future value since this is a terminal state
+            # advantage becomes just delta         
+            delta = data["reward"] - data["value"]
+            
+        else:
+            if i < len(rollout_data) - 1:
+                # value of state t+1 is the value of the next step in the rollout or the bootstrap value if this is the last step
+                next_value = rollout_data[i+1]["value"]
+            else:
+                next_value = last_step_bootstrap_value
+        
+            delta = data["reward"] + gamma * next_value - data["value"]
+
+        deltas.append(delta)
+
+    advantages = [None] * len(deltas)
+    returns = [None] * len(deltas)
+
+    gae = 0
+    for i in reversed(range(len(rollout_data))):
+        data = rollout_data[i]
+        if data['terminated'] or data['truncated']:
+            # no backpropagation is needed at the terminal states
+            advantages[i] = deltas[i]
+            gae = deltas[i]
+        else:
+            # gae = current steps error + discounted future gae
+            # there are two discounting factors 
+            # gamma - discounts all future 
+            # lambda - controls smoothing of current advantage with future. gae_t = (delta_t + lambda * delta_t+1 + lambda**2 * delta_t+2)
+            gae = deltas[i] + gamma * lam * gae # we are doing it in reverse, gae on right will refer to next step in trajectory
+
+        advantages[i] = gae
+        # actual return can be derived from advantage: 
+        # gae = reward_t + value_t+1 - value_t
+        # return_t = reward_t + value_t+1
+        # return_t = gae + value_t
+
+        returns[i] = gae + data["value"] 
 
     return advantages, returns
 
@@ -361,7 +439,8 @@ def train():
                 ep_length = 0
 
         # Compute advantages
-        advantages, returns = compute_gae(model, transitions, last_bootstrap)
+        advantages, returns, advantages_orig = compute_gae(model, transitions, last_bootstrap)
+        advantages_2, returns_2 = compute_gae_2(model, transitions, last_bootstrap)
 
         # PPO update
         metrics = ppo_update(model, optimizer, transitions, advantages, returns)
