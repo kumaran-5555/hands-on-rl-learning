@@ -214,9 +214,11 @@ def compute_gae_2(model, rollout_data, last_step_bootstrap_value, gamma=0.99, la
         else:
             # gae = current steps error + discounted future gae
             # there are two discounting factors 
-            # gamma - discounts all future 
-            # lambda - controls smoothing of current advantage with future. gae_t = (delta_t + lambda * delta_t+1 + lambda**2 * delta_t+2)
-            gae = deltas[i] + gamma * lam * gae # we are doing it in reverse, gae on right will refer to next step in trajectory
+            # gamma - discounts all future events
+            # lambda - controls smoothing of current advantage with future. gae_t = (delta_t + lambda * delta_t+1 + lambda**2 * delta_t+2 ...)
+
+            # we are doing it in reverse, gae on right will refer to next time step in the trajectory
+            gae = deltas[i] + gamma * lam * gae 
 
         advantages[i] = gae
         # actual return can be derived from advantage: 
@@ -376,6 +378,26 @@ def train():
 
 
         print(f"Iteration {i+1}/{total_iterations}: Policy Loss = {metrics['policy_loss']:.4f}, Value Loss = {metrics['value_loss']:.4f} : Episode Reward = {np.mean(ep_rewards):.2f}, Episode Length = {np.mean(ep_lengths):.2f}")
+
+
+    print("=" * 50)
+    print("Evalution ")
+
+    try:
+        vis_env = gym.make("CartPole-v1", render_mode="human")
+        for ep in range(5):
+            obs, _ = vis_env.reset()
+            done, truncated, score = False, False, 0
+            while not (done or truncated):
+                obs_tensor = torch.FloatTensor(obs)
+                with torch.no_grad():
+                    action, _, _ = model.get_action(obs_tensor, deterministic=True)
+                obs, reward, done, truncated, _ = vis_env.step(action.item())
+                score += reward
+            print(f"Episode {ep + 1} score: {score}")
+        vis_env.close()        
+    except Exception as e:
+        print("GUI not available. Skipping evaluation render.")
 
         
 
